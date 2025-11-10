@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KASPERIA — Kaspa ↔ Kasplex Bridge</title>
+  <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="index.html"><img src="./assets/logo.png" alt="Kasperia"><strong>KASPERIA</strong></a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html" class="active">Home</a>
+        <a href="./docs.html" class="">API Docs</a>
+        <a href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar" target="_blank" >Download</a>
+        <span class="nav-underline"></span>
+      </nav>
+      <button class="menu-btn" aria-label="menu"
+        onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </div>
+  </header>
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="animate__animated animate__fadeInLeftBig animate__fast">
+          <span class="badge">⚡ Kasperia — The Ultra-Light Kaspa Wallet for Speed, Simplicity & L2 Integration.</span>
+          <h1>Lightweight Kaspa wallet for <span class="g">Web3 interaction.</span></h1>
+          <p>With support for native KAS, KRC-20 tokens, and Kasplex L2 interactions, Kasperia makes it effortless to transfer, stake, and engage with next-generation decentralized applications directly in your browser.</p>
+          <div class="hero-ctas">
+            <a class="btn" href="./docs.html">Start with API</a>
+            <a class="btn secondary"
+              href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar">Get
+              Extension</a>
+          </div>
+          <div style="height:8px"></div>
+          <!-- <div class="badge">Mainnet · Security Audited · Open‑source SDK</div> -->
+        </div>
+        <div class="hero-card animate__animated animate__fadeInRightBig animate__fast">
+          <div class="hero-img">
+            <img src="./assets/banner.png" alt="Kasperia Wallet & Bridge Preview">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="container">
+        <h2 class="section-title">Built for Speed & Security</h2>
+        <p class="section-sub">Inspired by ZK systems and modular design, Kasperia blends scalability, safety, and
+          developer ergonomics.</p>
+        <div class="grid-3">
+          <div class="card">
+            <h3>Multisig + Risk Controls</h3>
+            <p>Audited bridge path and real‑time monitoring keep funds safe under complex conditions.</p>
+          </div>
+          <div class="card">
+            <h3>Low Latency & Cost</h3>
+            <p>High‑performance channels and batched proofs deliver faster confirmations with predictable fees.</p>
+          </div>
+          <div class="card">
+            <h3>Unified Accounts & APIs</h3>
+            <p>Manage multi‑network assets in one wallet. SDK & REST endpoints make integration straightforward.</p>
+          </div>
+        </div>
+        <div class="cta">
+          <div>
+            <h3>Get Kasperia Wallet</h3>
+            <p class="tiny">Currently available: <b>Browser Extension</b></p>
+          </div>
+          <div class="actions">
+            <a class="btn"
+              href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar">Chrome
+              Extension</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="bridge">
+      <div class="container">
+        <h2 class="section-title">Kaspa ↔ Kasplex Bridge</h2>
+        <p class="section-sub">A streamlined, in‑wallet flow from asset selection and approval through to finality. The system suggests the optimal route to balance speed and cost.</p>
+        <div class="grid-3">
+          <div class="card">
+            <h3>One‑Click Transfer</h3>
+            <p>Pick source & destination networks, enter amount, and submit. Smart hints for balances, max transferable, and fee estimates.</p>
+          </div>
+          <div class="card">
+            <h3>Observable Status</h3>
+            <p>A unified Activity center shows the full lifecycle—queued, batched, proven, and finalized.</p>
+          </div>
+          <div class="card">
+            <h3>Dev‑Friendly</h3>
+            <p>Web/mobile SDKs and reusable UI components help third‑party wallets and DApps integrate quickly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="developer">
+      <div class="container">
+        <h2 class="section-title">Developer Center</h2>
+        <p class="section-sub">Docs, examples, and a test environment for fast onboarding.</p>
+        <div class="grid-3">
+          <div class="card">
+            <h3>Docs & Guides</h3>
+            <p>Getting started, accounts, signing, bridging, events, best practices.</p>
+          </div>
+          <div class="card">
+            <h3>Example Repos</h3>
+            <p>TypeScript / Swift / Kotlin samples—clone and run.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div class="left">
+        <img src="./assets/logo.png" alt="logo">
+        <div>KASPERIA · © <span id="year"></span></div>
+      </div>
+      <div class="social">
+        <a href="https://github.com/jeanku/kasperia-extension" target="_blank" rel="noopener">
+          <img src="./assets/github.svg" alt="github">
+        </a>
+        <a href="https://x.com/KasperiaWallet" target="_blank" rel="noopener">
+          <img src="./assets/twitter.svg" alt="x">
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="./js/main.js"></script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

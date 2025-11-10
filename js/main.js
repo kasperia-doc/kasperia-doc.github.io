@@ -25,12 +25,26 @@
   if(!toc || !article) return
   const links = toc.querySelectorAll('a[href^="#"]')
   const map = new Map()
+  let clickLock = false
+  let clickTimer = null
+
   links.forEach(a => {
     const id = a.getAttribute('href').slice(1)
     const sec = document.getElementById(id)
     if(sec) map.set(sec, a)
+
+    a.addEventListener('click', e => {
+      links.forEach(l => l.classList.remove('active'))
+      a.classList.add('active')
+      clickLock = true
+      clearTimeout(clickTimer)
+      clickTimer = setTimeout(() => {
+        clickLock = false
+      }, 1000)
+    })
   })
   const io = new IntersectionObserver((entries)=>{
+    if (clickLock) return 
     entries.forEach(e=>{
       if(e.isIntersecting){
         links.forEach(l=>l.classList.remove('active'))

@@ -72,7 +72,11 @@ p.section-sub{color:var(--muted);margin:0 0 18px}
 .docs nav{position:sticky;top:76px;align-self:start;border:1px solid var(--stroke);border-radius:14px;background:#fff;box-shadow:var(--shadow);padding:14px}
 .docs nav a{display:block;padding:.4rem;color:var(--ink); border-radius: 6px;}
 .docs nav a:hover{background:var(--hover-bg); }
-.docs article{background:#fff;border:1px solid var(--stroke);border-radius:14px;box-shadow:var(--shadow);padding:20px}
+.docs nav a.active{background:#e7faff;color:#05333a}
+.docs article{margin-bottom:30px; background:#fff;border:1px solid var(--stroke);border-radius:14px;box-shadow:var(--shadow);padding:20px}
+.docs article h2 {
+  scroll-margin-top: 70px;
+}
 
 /* simple syntax highlight colors */
 pre{position: relative; background:#0b1e22;color:#d6f6ff;border-radius:12px;padding:14px;overflow:auto}

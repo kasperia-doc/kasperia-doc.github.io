@@ -16,9 +16,10 @@
     <div class="container nav">
       <a class="brand" href="index.html"><img src="./assets/logo.png" alt="Kasperia"><strong>KASPERIA</strong></a>
       <nav class="nav-links" id="navLinks">
-        <a href="index.html" class="active">Home</a>
-        <a href="./docs.html" class="">API Docs</a>
-        <a href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar" target="_blank" >Download</a>
+        <a href="index.html" class="">Home</a>
+        <a href="./docs.html" class="active">API Docs</a>
+        <a href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar"
+          target="_blank">Download</a>
         <span class="nav-underline"></span>
       </nav>
       <button class="menu-btn" aria-label="menu"
@@ -37,18 +38,16 @@
         <a href="#browser">Browser Detection</a>
 
         <a href="#integration">EVM integration</a>
-        <a href="#provider">Get Provier</a>
+        <a href="#provider">get Provier</a>
         <a href="#eth_requestAccounts">eth_requestAccounts</a>
-        <a href="#eth_accounts">eth_accounts</a>
+        <a href="#eth_accounts" class="active">eth_accounts</a>
         <a href="#eth_getBalance">eth_getBalance</a>
         <a href="#eth_chainId">eth_chainId</a>
-        <a href="#eth_version">eth_version</a>
-        <a href="#sendKaspa">sendKaspa</a>
         <a href="#wallet_switchEthereumChain">wallet_switchEthereumChain</a>
+        <a href="#eth_sendTransaction">eth_sendTransaction</a>
 
-        <a href="#Events">Events</a>
+        <strong>Events</strong>
         <a href="#accountsChanged">accountsChanged</a>
-        <a href="#networkChanged">networkChanged</a>
       </nav>
       <article>
         <h1>Kaspa Wallet Integration (Kasperia)</h1>
@@ -57,34 +56,52 @@
           multi‑wallet experience. The examples are TypeScript‑friendly.</p>
 
         <h2 id="wallet">Kasperia Wallet</h2>
-        <p>Kasperia Wallet is a non-custodial wallet. We never have access to your funds. Kasperia Wallet never stores your seed phrase, your password or any private information. Your accounts are derived from your Secret Recovery Phrase.</p>
+        <p>Kasperia Wallet is a non-custodial wallet. We never have access to your funds. Kasperia Wallet never stores
+          your seed phrase, your password or any private information. Your accounts are derived from your Secret
+          Recovery Phrase.</p>
         <ol>
-          <li>Kasperia Wallet is a hierarchical deterministic wallet. Your accounts are derived from your Secret Recovery Phrase.</li>
+          <li>Kasperia Wallet is a hierarchical deterministic wallet. Your accounts are derived from your Secret
+            Recovery Phrase.</li>
           <li>Your private keys are encrypted on your device by your password and are never shared with anyone.</li>
-          <li>Kasperia Wallet doesn't track any personal identifiable information, your account addresses, or asset balances.</li>
+          <li>Kasperia Wallet doesn't track any personal identifiable information, your account addresses, or asset
+            balances.</li>
           <li>Use RPC/SDK to query balances and submit transactions.</li>
         </ol>
         <h2 id="quickStart">Quick Start</h2>
-        <h6>chrome extension </h6>
-        <p>Go to the <a href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar"
-          target="_blank">chrome extension</a> webstore and install Kasperia wallet extension.</p>
+        <p>Go to the <a
+            href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&utm_source=ext_sidebar"
+            target="_blank">chrome extension</a> webstore and install Kasperia wallet extension.</p>
 
 
         <h2 id="kaspa">Kaspa integration</h2>
-        <p>Welcome to Kasperia's integration documentation. This documentation is for learning to integrate Kasperia wallet with your applications. Please note : The integration API may be modified if relevant standards are officially released by kaspa core team one day in the future.</p>
+        <p>Welcome to Kasperia's integration documentation. This documentation is for learning to integrate Kasperia
+          wallet with your applications. Please note : The integration API may be modified if relevant standards are
+          officially released by kaspa core team one day in the future.</p>
         <h4>Getting Started</h4>
-        <p>First of all, install Kasperia Wallet on your development machine. Once Kasperia Wallet is installed and running, you should find that new browser tabs have a window.kasperia object available in the developer console. This is how your website will interact with Kasperia Wallet.</p>
-        <h4 id="browser">Browser Detection</h4>
-        <p>To verify if the browser is running Kasperia Wallet, copy and paste the code snippet below in the developer console of your web browser:</p>
+        <p>First of all, install Kasperia Wallet on your development machine. Once Kasperia Wallet is installed and
+          running, you should find that new browser tabs have a window.kasperia object available in the developer
+          console. This is how your website will interact with Kasperia Wallet.</p>
+        <h2 id="browser">Browser Detection</h2>
+        <p>To verify if the browser is running Kasperia Wallet, copy and paste the code snippet below in the developer
+          console of your web browser:</p>
         <pre><button class="copy-btn">Copy</button><code class="language-js">if (typeof window.kasperia !== 'undefined') {
   console.log('kasperia Wallet is installed!');
 }</code></pre>
         <p>You can review the full API for the window.kasperia object here.</p>
         <h2 id="integration">EVM integration</h2>
-        <p class="mb10">In order to provide support for Kaspa-based layer2 networks, the kasperia wallet has integrated support for EVM networks. When utilizing the kasperia wallet, users can directly submit layer2 transactions to Kaspa. Consequently, this offers protection against MEV attacks, which is a distinct advantage compared to other wallets.</p>
-        <p class="mb10">EVM web apps can interact with Kasperia wallet via the provider that is injected at window.Kasperia.ethereum. This provider conforms to the <a href="https://eips.ethereum.org/EIPS/eip-1193" target="_blank">EIP-1193</a> standard and is also injected at window.ethereum to support legacy integrations.</p>
-        <p class="mb10">To detect if a user has already installed Kasperia wallet, a web application should check for the existence of a Kasperia object.
-If a Kasperia object exists, EVM dApps can interact with Kasperia wallet via the API found at window.kasperia.ethereum. This ethereum provider is also made available at window.ethereum but is prone to namespace collisions from other injected wallets.</p>
+        <p class="mb10">In order to provide support for Kaspa-based layer2 networks, the kasperia wallet has integrated
+          support for EVM networks. When utilizing the kasperia wallet, users can directly submit layer2 transactions to
+          Kaspa. Consequently, this offers protection against MEV attacks, which is a distinct advantage compared to
+          other wallets.</p>
+        <p class="mb10">EVM web apps can interact with Kasperia wallet via the provider that is injected at
+          window.Kasperia.ethereum. This provider conforms to the <a href="https://eips.ethereum.org/EIPS/eip-1193"
+            target="_blank">EIP-1193</a> standard and is also injected at window.ethereum to support legacy
+          integrations.</p>
+        <p class="mb10">To detect if a user has already installed Kasperia wallet, a web application should check for
+          the existence of a Kasperia object.
+          If a Kasperia object exists, EVM dApps can interact with Kasperia wallet via the API found at
+          window.kasperia.ethereum. This ethereum provider is also made available at window.ethereum but is prone to
+          namespace collisions from other injected wallets.</p>
 
         <h2 id="provider">Get Provider</h2>
         <p></p>
@@ -122,8 +139,9 @@ const kasperia = await getProvider()
 </code></pre>
 
         <h2 id="eth_accounts">eth_accounts</h2>
-        <pre><button class="copy-btn">Copy</button><code class="language-js">const accounts = await this.provider.request({ method: "eth_accounts" })</code></pre>
-        <p>Get address of current account. It's also used to certify if the user is connected, which should be called first.</p>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">const accounts = await kasperia.provider.request({ method: "eth_accounts" })</code></pre>
+        <p>Get address of current account. It's also used to certify if the user is connected, which should be called
+          first.</p>
         <h4>Parameters</h4>
         <p>none</p>
         <h4>Returns</h4>
@@ -137,9 +155,10 @@ const kasperia = await getProvider()
 }
 > connect success ['0xAd0a0406fF27e4De7B7577e8e1877A8780f3E138']</code></pre>
 
-<h2 id="eth_getBalance">eth_getBalance</h2>
-        <pre><button class="copy-btn">Copy</button><code class="language-js">const accounts = await this.provider.request({ method: "eth_getBalance" })</code></pre>
-        <p>Get address of current account. It's also used to certify if the user is connected, which should be called first.</p>
+        <h2 id="eth_getBalance">eth_getBalance</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">const balance = await kasperia.provider.request({ method: "eth_getBalance" })</code></pre>
+        <p>Get balance of current account. It's also used to certify if the user is connected, which should be called
+          first.</p>
         <h4>Parameters</h4>
         <pre><code class="language-js">params: [address, "latest"]</code></pre>
         <h4>Returns</h4>
@@ -155,13 +174,13 @@ const kasperia = await getProvider()
 }
 > balance info 0x0</code></pre>
 
-<h2 id="eth_chainId">eth_chainId</h2>
-        <pre><button class="copy-btn">Copy</button><code class="language-js">const chainId = await this.provider.request({ method: "eth_chainId" })</code></pre>
-        <p>Get address of current account. It's also used to certify if the user is connected, which should be called first.</p>
+        <h2 id="eth_chainId">eth_chainId</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">const chainId = await kasperia.provider.request({ method: "eth_chainId" })</code></pre>
+        <p>get network</p>
         <h4>Parameters</h4>
         <p>none</p>
         <h4>Returns</h4>
-        <p>Promise - string:  the chainId in hexadecimal</p>
+        <p>Promise - string: the chainId in hexadecimal</p>
         <h4>Example</h4>
         <pre><button class="copy-btn">Copy</button><code class="language-js">try {
   let chainId = await kasperia.provider.request({   method: "eth_chainId" })
@@ -171,22 +190,98 @@ const kasperia = await getProvider()
 }
 > chainId info 0xcc</code></pre>
 
-<h2 id="eth_version">eth_version</h2>
-        <pre><button class="copy-btn">Copy</button><code class="language-js">const version = await this.provider.request({ method: "eth_version" })</code></pre>
-        <p>Get address of current account. It's also used to certify if the user is connected, which should be called first.</p>
+        <h2 id="wallet_switchEthereumChain">wallet_switchEthereumChain</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">const chainId = await kasperia.provider.request({ 
+  method: "wallet_switchEthereumChain", 
+  params: [{ chainId: "0x28c64" }] 
+})</code></pre>
+        <p></p>
         <h4>Parameters</h4>
-        <p>none</p>
+        <p>params: [{ chainId: "0x28c64" }]</p>
         <h4>Returns</h4>
-        <p>Promise - string:  the chainId in hexadecimal</p>
+        <p>none</p>
         <h4>Example</h4>
         <pre><button class="copy-btn">Copy</button><code class="language-js">try {
-  let version = await kasperia.provider.request({method: "eth_version" })
-  console.log('version info', version);
+  await kasperia.provider.request({ 
+    method: "wallet_switchEthereumChain", 
+    params: [{ chainId: "0x28c64" }] 
+  })
+  console.log('chainId switch successful');
 } catch (e) {
-  console.log('version failed');
-}
-> version info 0xcc</code></pre>
+  console.log('chainId failed');
+}</code></pre>
+        <h2 id="eth_sendTransaction">sendTransaction</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">const hash = await kasperia.provider.request({
+  method: 'eth_sendTransaction',
+  params: [{
+    from: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
+    to: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
+    value: '0x0',
+    data: '.....'
+  }]
+});</code></pre>
+        <p>
+          The <code>sendTransaction</code> method constructs and sends an Ethereum transaction through the connected
+          wallet provider.
+          It internally encodes the contract call <code>lockForBridge(payloadHex)</code> and sends it to the specified
+          smart contract address.
+        </p>
 
+        <h4>Parameters</h4>
+        <ul>
+          <li><strong>from</strong> - string: The source address (currently connected wallet address).</li>
+          <li><strong>to</strong> - string: Target contract address .</li>
+          <li><strong>value</strong> - string: Transaction value in hexadecimal.</li>
+          <li><strong>data</strong> - string: ABI-encoded contract function call (<code>lockForBridge</code> payload).
+          </li>
+        </ul>
+
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>hash</strong> - string: Transaction hash returned from the provider.</li>
+        </ul>
+
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">import Web3 from "web3";
+const web3 = new Web3(kasperia.provider)
+const toAddress = "kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl"
+const contractAbi = [...]
+const contractAddress = "0x1234567890123456789012345678901234567890"
+const contract =new web3.eth.Contract(contractAbi,contractAddress)
+const payloadHex =web3.utils.toHex(toAddress)
+const data = contract.methods.lockForBridge(payloadHex).encodeABI();
+try {
+const hash = await kasperia.provider.request({
+  method: 'eth_sendTransaction',
+  params: [{
+    from: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
+    to: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
+    value: '0x0',
+    data
+  }]
+})
+  console.log("Transaction Hash:", hash);
+} catch (error) {
+  console.log("Transaction failed:", error);
+}</code></pre>
+
+
+
+        <h2 id="Events">Events</h2>
+        <h4 id="accountsChanged">accountsChanged</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.provider.on('accountsChanged', onAccountsChangedHandler);
+kasperia.provider.removeListener('accountsChanged', onAccountsChangedHandler);
+</code></pre>
+        <p>The accountsChanged will be emitted whenever the user's exposed account address changes.</p>
+
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">
+kasperia.provider.on('accountsChanged', (accounts) => {
+  const accounts = Array.isArray(accountsRaw) ? accountsRaw : [];
+  const address = accounts[0] ?? '';
+  console.log('address', address)
+})
+</code></pre>
 
 
       </article>
@@ -209,8 +304,8 @@ const kasperia = await getProvider()
       </div>
     </div>
   </footer>
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
-    <script src="../js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+  <script src="../js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 
 </body>

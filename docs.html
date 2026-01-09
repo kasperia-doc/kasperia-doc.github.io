@@ -34,20 +34,47 @@
         <a href="#wallet" class="active">Kasperia Wallet</a>
         <a href="#quickStart">Quick Start</a>
 
-        <a href="#kaspa">Kaspa integration</a>
-        <a href="#browser">Browser Detection</a>
+        <details class="toc-group" open>
+          <summary>
+            <span>Kaspa integration</span>
+            <span class="toc-desc">Kaspa-native API</span>
+          </summary>
+          <a class="toc-sub" href="#kaspa">Getting Started</a>
+          <a class="toc-sub" href="#browser">Browser Detection</a>
+          <a class="toc-sub" href="#connecting">Connecting to Kasperia Wallet</a>
+          <strong class="toc-strong">Methods</strong>
+          <a class="toc-sub" href="#kaspa-requestAccounts">requestAccounts</a>
+          <a class="toc-sub" href="#kaspa-getAccounts">getAccounts</a>
+          <a class="toc-sub" href="#kaspa-getVersion">getVersion</a>
+          <a class="toc-sub" href="#kaspa-getNetwork">getNetwork</a>
+          <a class="toc-sub" href="#kaspa-switchNetwork">switchNetwork</a>
+          <a class="toc-sub" href="#kaspa-disconnect">disconnect</a>
+          <a class="toc-sub" href="#kaspa-getPublicKey">getPublicKey</a>
 
-        <a href="#integration">EVM integration</a>
-        <a href="#provider">get Provier</a>
-        <a href="#eth_requestAccounts">eth_requestAccounts</a>
-        <a href="#eth_accounts" >eth_accounts</a>
-        <a href="#eth_getBalance">eth_getBalance</a>
-        <a href="#eth_chainId">eth_chainId</a>
-        <a href="#wallet_switchEthereumChain">wallet_switchEthereumChain</a>
-        <a href="#eth_sendTransaction">eth_sendTransaction</a>
+          <a class="toc-sub" href="#kaspa-getBalance">getBalance</a>
+          <a class="toc-sub" href="#kaspa-sendKaspa">sendKaspa</a>
+          <a class="toc-sub" href="#kaspa-submitCommitReveal">submitCommitReveal</a>
 
-        <strong>Events</strong>
-        <a href="#accountsChanged">accountsChanged</a>
+          <strong class="toc-strong">Events</strong>
+          <a class="toc-sub" href="#kaspa-accountsChanged">accountsChanged</a>
+          <a class="toc-sub" href="#kaspa-networkChanged">networkChanged</a>
+        </details>
+        <details class="toc-group" open>
+          <summary>
+            <span>EVM integration</span>
+            <span class="toc-desc">Injected EIP-1193</span>
+          </summary>
+          <a class="toc-sub" href="#integration">Overview</a>
+          <a class="toc-sub" href="#provider">get Provider</a>
+          <a class="toc-sub" href="#eth_requestAccounts">eth_requestAccounts</a>
+          <a class="toc-sub" href="#eth_accounts">eth_accounts</a>
+          <a class="toc-sub" href="#eth_getBalance">eth_getBalance</a>
+          <a class="toc-sub" href="#eth_chainId">eth_chainId</a>
+          <a class="toc-sub" href="#wallet_switchEthereumChain">wallet_switchEthereumChain</a>
+          <a class="toc-sub" href="#eth_sendTransaction">eth_sendTransaction</a>
+          <strong class="toc-strong">Events</strong>
+          <a class="toc-sub" href="#accountsChanged">accountsChanged</a>
+        </details>
       </nav>
       <article>
         <h1>Kaspa Wallet Integration (Kasperia)</h1>
@@ -88,6 +115,260 @@
   console.log('kasperia Wallet is installed!');
 }</code></pre>
         <p>You can review the full API for the window.kasperia object here.</p>
+        <h2 id="connecting">Connecting to kasperia Wallet</h2>
+        <p class="mb10">"Connecting" or "logging in" to kasperia Wallet effectively means "to access the user's Kaspa
+          account(s)".</p>
+        <p class="mb10">You should only initiate a connection request in response to direct user action, such as
+          clicking a button. You should always disable the "connect" button while the connection request is pending. You
+          should never initiate a connection request on page load.</p>
+        <p>We recommend that you provide a button to allow the user to connect kasperia Wallet to your dapp. Clicking
+          this button should call the following method:</p>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.requestAccounts();</code></pre>
+
+        <h2 id="kaspa-requestAccounts">Methods</h2>
+        <h4>requestAccounts</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.requestAccounts();</code></pre>
+        <p>Connect the current account.</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <p>Promise returns string[] : Address of current account.</p>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let accounts = await kasperia.requestAccounts();
+  console.log('connect success', accounts);
+} catch (e) {
+  console.log('connect failed');
+}
+> connect success ['kaspatest:qq9h47etjv6x8jgcla0ecnp8mgrkfxm70ch3k60es5a50ypsf4h6sak3g0lru']</code></pre>
+        <h2 id="kaspa-getAccounts">getAccounts</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.getAccounts();</code></pre>
+        <p>Get address of current account. It's also used to certify if the user is connected, which should be called
+          first.</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - string: address of current account</li>
+        </ul>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let res = await window.kasperia.getAccounts();
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+> ["kaspatest:qq9h47etjv6x8jgcla0ecnp8mgrkfxm70ch3k60es5a50ypsf4h6sak3g0lru"]</code></pre>
+
+        <h2 id="kaspa-getVersion">getVersion</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.getVersion();</code></pre>
+        <p>get wallet version</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - string: wallet version</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  const res = await kasperia.getVersion();
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+> "1.10.52"</code></pre>
+
+        <h2 id="kaspa-getNetwork">getNetwork</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.getNetwork();</code></pre>
+        <p>get network</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - string: the network. livenet and testnet</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let res = await kasperia.getNetwork();
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+​
+> 'mainnet'</code></pre>
+
+        <h2 id="kaspa-switchNetwork">switchNetwork</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.switchNetwork(network);</code></pre>
+        <p>switch network It's disable in the mobile app.</p>
+        <h4>Parameters</h4>
+        <ul>
+          <li><strong>network</strong> - string: the network. mainnet/testnet</li>
+        </ul>
+        <h4>Returns</h4>
+        <p>none</p>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let res = await kasperia.switchNetwork("mainnet");
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+​
+</code></pre>
+
+        <h2 id="kaspa-disconnect">disconnect</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.disconnect(origin);</code></pre>
+        <p>disconnect kasperia wallet</p>
+        <h4>Parameters</h4>
+        <ul>
+          <li><strong>origin</strong> - string: website origin url</li>
+        </ul>
+        <h4>Returns</h4>
+        <p>none</p>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let origin = window.location.origin;
+  await kasperia.disconnect(origin);
+} catch (e) {
+  console.log(e);
+}
+​</code></pre>
+
+
+        <h2 id="kaspa-getPublicKey">getPublicKey</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.getPublicKey();</code></pre>
+        <p>Get publicKey of current account.</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - string: publicKey</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let res = await kasperia.getPublicKey();
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+> 03cbaedc26f03fd3ba02fc936f338e980c9e2172c5e23128877ed46827e935296f</code></pre>
+
+
+        <h2 id="kaspa-getBalance">getBalance</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.getBalance();</code></pre>
+        <p>Get KAS balance</p>
+        <h4>Parameters</h4>
+        <p>none</p>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - Object:</li>
+          <li class="ml20"><strong>total</strong> - number : the total sompi</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let res = await kasperia.getBalance();
+  console.log(res)
+} catch (e) {
+  console.log(e);
+}
+​
+> {
+    "total":100000
+  }</code></pre>
+
+        <h2 id="kaspa-sendKaspa">sendKaspa</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.sendKaspa(toAddress, sompi, options);</code></pre>
+        <p>Send KAS</p>
+        <h4>Parameters</h4>
+        <ul>
+          <li><strong>toAddress</strong> - string: the address to send</li>
+          <li><strong>sompi</strong> - number: the sompi to send</li>
+          <li><strong>options</strong> - object: (optional)</li>
+          <li class="ml20"><strong>payload</strong> - string: payload for transactions</li>
+        </ul>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> - string: txid</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  let txid = await kasperia.sendKaspa(
+    "kaspatest:qq9h47etjv6x8jgcla0ecnp8mgrkfxm70ch3k60es5a50ypsf4h6sak3g0lru",
+    1000
+  );
+  console.log(txid);
+} catch (e) {
+  console.log(e);
+}</code></pre>
+
+        <h2 id="kaspa-submitCommitReveal">submitCommitReveal</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.submitCommitReveal(commitParams, revealParams);</code></pre>
+        <p>Submit commit & reveal transactions for inscription (e.g. KNS / KRC).</p>
+        <h4>Parameters</h4>
+        <p>commitParams – object</p>
+        <p class="ml20">Commit transaction parameters.</p>
+        <ul>
+          <li><strong>outputs</strong> - array</li>
+        </ul>
+        <p>Output list for commit transaction.</p>
+        <ul>
+          <li><strong>address</strong> - string: Receiver address (testnet / mainnet).</li>
+          <li><strong>amount</strong> - string: Amount in sompi.</li>
+        </ul>
+        <p>revealParams – object</p>
+        <p class="ml20">Reveal (inscription) parameters.</p>
+        <ul>
+          <li><strong>Promise</strong> – object</li>
+          <li class="ml20"><strong>protocol</strong> - string: Protocol name, e.g. "kns" | "krc20" | "kspr_krc721"</li>
+          <li class="ml20"><strong>action</strong> - object: Inscription action payload, depends on protocol.</li>
+        </ul>
+        <h4>Returns</h4>
+        <ul>
+          <li><strong>Promise</strong> – object</li>
+          <li class="ml20"><strong>commitTxid</strong> - string: Commit transaction hash.</li>
+          <li class="ml20"><strong>revealTxid</strong> - string: Reveal transaction hash.</li>
+        </ul>
+        <h4>Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">try {
+  const result = await kasperia.submitCommitReveal(
+    {
+      outputs: [
+        {
+          address: "kaspatest:qq9h47etjv6x8jgcla0ecnp8mgrkfxm70ch3k60es5a50ypsf4h6sak3g0lru",
+          amount: "3500000000",
+        },
+      ],
+    },
+    {
+      protocol: "kns",
+      action: {
+        op: "create",
+        p: "domain",
+        v: "jemes22",
+      },
+    }
+  );
+
+  console.log("commit & reveal txid", result);
+} catch (e) {
+  console.log(e);
+}</code></pre>
+        <h4>Response Example</h4>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">{
+  commitTxid: "d4aa375cbf00ef14b1a6eb3f15a2ade2dfcc22b259495ade8d92688c9a9c6f81",
+  revealTxid: "71ba18fc3e14088c843760ab4a7876bf0997608c0682fb8e1632481b35c99724"
+}</code></pre>
+
+        <h2 id="kaspa-accountsChanged">accountsChanged</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.on('accountsChanged', handler: (accounts: Array<string>) => void);
+kasperia.removeListener('accountsChanged', handler: (accounts: Array<string>) => void);</code></pre>
+        <p>The accountsChanged will be emitted whenever the user's exposed account address changes.</p>
+
+        <h2 id="kaspa-networkChanged">networkChanged</h2>
+        <pre><button class="copy-btn">Copy</button><code class="language-js">kasperia.on('networkChanged', handler: (network: string) => void);
+kasperia.removeListener('networkChanged', handler: (network: string) => void);</code></pre>
+        <p>The networkChanged will be emitted whenever the user's network changes.</p>
+
+
+
         <h2 id="integration">EVM integration</h2>
         <p class="mb10">In order to provide support for Kaspa-based layer2 networks, the kasperia wallet has integrated
           support for EVM networks. When utilizing the kasperia wallet, users can directly submit layer2 transactions to

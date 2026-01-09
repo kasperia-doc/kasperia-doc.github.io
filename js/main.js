@@ -23,19 +23,27 @@
   const toc = document.querySelector('.docs nav')
   const article = document.querySelector('.docs article')
   if(!toc || !article) return
+
   const links = toc.querySelectorAll('a[href^="#"]')
   const map = new Map()
   let clickLock = false
   let clickTimer = null
+
+  function setActive(a){
+    links.forEach(l => l.classList.remove('active'))
+    if(!a) return
+    a.classList.add('active')
+    const details = a.closest('details')
+    if(details) details.open = true
+  }
 
   links.forEach(a => {
     const id = a.getAttribute('href').slice(1)
     const sec = document.getElementById(id)
     if(sec) map.set(sec, a)
 
-    a.addEventListener('click', e => {
-      links.forEach(l => l.classList.remove('active'))
-      a.classList.add('active')
+    a.addEventListener('click', () => {
+      setActive(a)
       clickLock = true
       clearTimeout(clickTimer)
       clickTimer = setTimeout(() => {
@@ -43,17 +51,24 @@
       }, 1000)
     })
   })
+
   const io = new IntersectionObserver((entries)=>{
-    if (clickLock) return 
+    if (clickLock) return
     entries.forEach(e=>{
       if(e.isIntersecting){
-        links.forEach(l=>l.classList.remove('active'))
-        const a = map.get(e.target)
-        if(a) a.classList.add('active')
+        setActive(map.get(e.target))
       }
     })
   },{rootMargin:'-20% 0px -70% 0px', threshold:[0,1]})
+
   map.forEach((a,sec)=>io.observe(sec))
+
+  // Ensure the correct group is expanded when landing with a hash.
+  const hash = decodeURIComponent(location.hash || '').replace(/^#/, '')
+  if(hash){
+    const initial = toc.querySelector(`a[href="#${hash}"]`)
+    if(initial) setActive(initial)
+  }
 })();
 
 // Simple JS highlighter

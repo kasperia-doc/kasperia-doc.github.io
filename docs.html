@@ -83,10 +83,8 @@
 </nav>
 <article class="article">
 <h1 id="overview">Kasperia Wallet API Documentation</h1>
-<p class="lead">This guide explains how a dApp can connect to Kasperia Wallet, read accounts and balances, switch networks, sign messages, and send transactions from the Kasperia mobile app WebView or browser extension.</p>
-<div class="hero-note">
-<strong>Recommended namespace:</strong> use <code>window.kasperia</code> for Kaspa native APIs and <code>window.kasperia.ethereum</code> for EVM APIs. This document intentionally avoids the uppercase namespace to prevent integration bugs caused by mixed casing.
-        </div>
+<p class="lead">Integrate Kasperia Wallet by choosing one access mode first: use the injected provider inside the Kasperia App WebView or desktop extension, or use a deep-link request with callback from an external mobile browser. This guide covers connecting accounts, checking networks, reading balances, signing messages, and sending transactions.</p>
+<div class="hero-note"><strong>Recommended namespaces:</strong> use <code>window.kasperia</code> for Kaspa native APIs and <code>window.kasperia.ethereum</code> for EVM APIs. New integrations should avoid mixed casing or fallback global names unless a third-party EVM library requires <code>window.ethereum</code>.</div>
 <div class="cards">
 <div class="card"><h3>Kaspa Native</h3><p>Use <code>window.kasperia</code> to connect a Kaspa account, read network and balance, switch Kaspa network, and send KAS.</p></div>
 <div class="card"><h3>EVM</h3><p>Use <code>window.kasperia.ethereum</code> as an EIP-1193 compatible provider for EVM accounts, chains, RPC, and transactions.</p></div>
@@ -119,31 +117,94 @@
 </table>
 </div>
 <h2 id="quick-start">Quick Start</h2>
-<p>Use this detection flow before calling any wallet method.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">getKasperia</span>() {
-  <span class="hl-kw">if</span> (window.kasperia &amp;&amp; window.kasperia.isKasperia) {
-    <span class="hl-kw">return</span> window.kasperia;
-  }
-  <span class="hl-kw">return</span> <span class="hl-kw">null</span>;
+<p>Most integrations should follow this order:</p>
+<ol>
+<li><strong>Detect the environment.</strong> If <code>window.kasperia</code> exists, use the injected provider. If it does not exist on mobile, open Kasperia through the external request flow.</li>
+<li><strong>Connect after a user click.</strong> Use <code>requestAccounts()</code> for Kaspa or <code>eth_requestAccounts</code> for EVM.</li>
+<li><strong>Check the current network.</strong> Read <code>getNetwork()</code> or <code>eth_chainId</code>. If the user is on the wrong network, call the switch method and wait for confirmation.</li>
+<li><strong>Read state.</strong> Read the selected account, balance, and network again after connect or switch.</li>
+<li><strong>Submit user actions.</strong> Sign messages or send transactions only after the user confirms the action in your UI.</li>
+</ol>
+<div class="callout">For a normal EVM dApp, the shortest path is: detect provider → <code>eth_requestAccounts</code> → <code>eth_chainId</code> → <code>wallet_switchEthereumChain</code> if needed → <code>eth_sendTransaction</code> or <code>personal_sign</code>.</div>
+<h3>Copy-paste EVM integration</h3>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const KASPLEX_L2_TESTNET = '0x28c64'; // 167012
+const KASPLEX_L2_MAINNET = '0x3173b'; // 202555
+const BSC_TESTNET = '0x61'; // 97
+const BSC_MAINNET = '0x38'; // 56
+
+function getKasperiaWallet() {
+  return window.kasperia &amp;&amp; window.kasperia.isKasperia ? window.kasperia : null;
 }
 
-<span class="hl-kw">function</span> <span class="hl-fn">getKasperiaEthereum</span>() {
-  <span class="hl-kw">const</span> wallet = <span class="hl-fn">getKasperia</span>();
-  <span class="hl-kw">return</span> wallet &amp;&amp; wallet.ethereum ? wallet.ethereum : <span class="hl-kw">null</span>;
+function getKasperiaEvmProvider() {
+  const wallet = getKasperiaWallet();
+  return wallet &amp;&amp; wallet.ethereum ? wallet.ethereum : null;
 }
 
-<span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">connectKaspa</span>() {
-  <span class="hl-kw">const</span> wallet = <span class="hl-fn">getKasperia</span>();
-  <span class="hl-kw">if</span> (!wallet) <span class="hl-kw">throw</span> <span class="hl-kw">new</span> <span class="hl-fn">Error</span>(<span class="hl-str">'Kasperia Wallet is not available'</span>);
-  <span class="hl-kw">return</span> <span class="hl-kw">await</span> wallet.<span class="hl-fn">requestAccounts</span>();
+async function waitForKasperia(timeout = 3000) {
+  const wallet = getKasperiaWallet();
+  if (wallet) return wallet;
+
+  return new Promise((resolve, reject) =&gt; {
+    const timer = setTimeout(() =&gt; reject(new Error('Kasperia provider not found')), timeout);
+
+    window.addEventListener('kasperia#initialized', () =&gt; {
+      clearTimeout(timer);
+      const injected = getKasperiaWallet();
+      injected ? resolve(injected) : reject(new Error('Kasperia provider not found'));
+    }, { once: true });
+  });
 }
 
-<span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">connectEvm</span>() {
-  <span class="hl-kw">const</span> provider = <span class="hl-fn">getKasperiaEthereum</span>();
-  <span class="hl-kw">if</span> (!provider) <span class="hl-kw">throw</span> <span class="hl-kw">new</span> <span class="hl-fn">Error</span>(<span class="hl-str">'Kasperia EVM provider is not available'</span>);
-  <span class="hl-kw">return</span> <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({ method: <span class="hl-str">'eth_requestAccounts'</span> });
+async function connectEvm() {
+  await waitForKasperia();
+  const provider = getKasperiaEvmProvider();
+  if (!provider) throw new Error('Kasperia EVM provider is not available');
+
+  const accounts = await provider.request({ method: 'eth_requestAccounts' });
+  return { provider, address: accounts[0] };
+}
+
+async function ensureEvmChain(provider, targetChainId) {
+  const currentChainId = await provider.request({ method: 'eth_chainId' });
+  if (currentChainId.toLowerCase() === targetChainId.toLowerCase()) return;
+
+  await provider.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: targetChainId }]
+  });
+}
+
+async function connectAndPrepareEvm() {
+  const { provider, address } = await connectEvm();
+  await ensureEvmChain(provider, KASPLEX_L2_TESTNET);
+
+  const balance = await provider.request({
+    method: 'eth_getBalance',
+    params: [address, 'latest']
+  });
+
+  return { provider, address, balance };
 }</code></pre>
-<div class="callout warning">Only call connection, signing, switching, or transaction methods after a direct user action, such as clicking a button. Do not trigger these requests on page load.</div>
+<h3>Copy-paste Kaspa native integration</h3>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function connectKaspa() {
+  const wallet = await waitForKasperia();
+
+  const accounts = await wallet.requestAccounts();
+  const address = accounts[0];
+
+  const network = await wallet.getNetwork();
+  const balance = await wallet.getBalance();
+
+  return { wallet, address, network, balance };
+}
+
+async function switchKaspaToTestnet10() {
+  const wallet = await waitForKasperia();
+  await wallet.switchNetwork('testnet-10');
+  return await wallet.getNetwork();
+}</code></pre>
+<div class="callout warning">Do not trigger connect, switch network, signing, or transaction requests on page load. These requests should be started by a direct user action, such as clicking a Connect, Switch, Sign, or Send button.</div>
 <h2 id="mobile-overview">Mobile Overview</h2>
 <p>The Kasperia mobile app supports two mobile access paths:</p>
 <ol>
@@ -151,72 +212,74 @@
 <li><strong>External Browser:</strong> the dApp runs outside Kasperia. Use a deep link or universal link request to open Kasperia and get a callback response.</li>
 </ol>
 <h2 id="app-webview">In-App Browser</h2>
-<p>When a dApp is opened inside the Kasperia app, the app injects the provider at document start. The dApp should detect <code>window.kasperia</code> and then call the same APIs as the extension integration.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">ensureKasperiaReady</span>(timeout = <span <span="" class="hl-kw">class</span>="hl-num"&gt;3000) {
-  <span class="hl-kw">if</span> (window.kasperia &amp;&amp; window.kasperia.isKasperia) <span class="hl-kw">return</span> window.kasperia;
+<p>Use this mode when your dApp is opened inside the Kasperia mobile app. The app injects <code>window.kasperia</code> at document start. Your page should wait for the provider, then use the same APIs as the browser extension integration.</p>
+<div class="callout">Recommended page behavior: show a Connect Wallet button, call <code>waitForKasperia()</code> after the click, then call the account, network, balance, sign, or transaction method required by your product flow.</div>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function initInKasperiaApp() {
+  const wallet = await waitForKasperia();
 
-  <span class="hl-kw">return</span> <span class="hl-kw">await</span> <span class="hl-kw">new</span> <span class="hl-fn">Promise</span>((resolve, reject) =&gt; {
-    <span class="hl-kw">const</span> timer = <span class="hl-fn">setTimeout</span>(() =&gt; <span class="hl-fn">reject</span>(<span class="hl-kw">new</span> <span class="hl-fn">Error</span>(<span class="hl-str">'Kasperia provider not found'</span>)), timeout);
+  // Kaspa native provider
+  const kaspaAccounts = await wallet.requestAccounts();
 
-    window.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'kasperia#initialized'</span>, () =&gt; {
-      <span class="hl-fn">clearTimeout</span>(timer);
-      <span class="hl-kw">if</span> (window.kasperia &amp;&amp; window.kasperia.isKasperia) {
-        <span class="hl-fn">resolve</span>(window.kasperia);
-      } <span class="hl-kw">else</span> {
-        <span class="hl-fn">reject</span>(<span class="hl-kw">new</span> <span class="hl-fn">Error</span>(<span class="hl-str">'Kasperia provider not found'</span>));
-      }
-    }, { once: <span class="hl-kw">true</span> });
-  });
+  // EVM provider
+  const evmProvider = wallet.ethereum;
+  const evmAccounts = evmProvider
+    ? await evmProvider.request({ method: 'eth_requestAccounts' })
+    : [];
+
+  return { wallet, kaspaAccounts, evmProvider, evmAccounts };
 }</code></pre>
-<p>After the provider is available, connect and continue with network or transaction calls:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">connectAndReadState</span>() {
-  <span class="hl-kw">const</span> wallet = <span class="hl-kw">await</span> <span class="hl-fn">ensureKasperiaReady</span>();
-
-  <span class="hl-kw">const</span> kaspaAccounts = <span class="hl-kw">await</span> wallet.<span class="hl-fn">requestAccounts</span>();
-  <span class="hl-kw">const</span> kaspaNetwork = <span class="hl-kw">await</span> wallet.<span class="hl-fn">getNetwork</span>();
-  <span class="hl-kw">const</span> networks = <span class="hl-kw">await</span> wallet.<span class="hl-fn">getNetworks</span>();
-  <span class="hl-kw">const</span> balance = <span class="hl-kw">await</span> wallet.<span class="hl-fn">getBalance</span>();
-
-  <span class="hl-kw">return</span> { kaspaAccounts, kaspaNetwork, networks, balance };
-}</code></pre>
+<p>After connection, always re-read the network before showing balances or enabling transaction buttons.</p>
 <h2 id="external-browser">External Browser</h2>
-<p>If the user opens your dApp in an external mobile browser, there may be no injected provider. In that case, build a request payload and open Kasperia using one of these URLs:</p>
+<p>Use this mode when the user opens your dApp in Safari, Chrome, Telegram, X, or another external mobile app. In this environment, the page cannot assume that <code>window.kasperia</code> is injected. Instead, create a wallet request, open Kasperia, and receive the result through your callback URL.</p>
+<div class="callout">Use external requests for one wallet action at a time: connect, switch network, sign, or send transaction. For a full dApp session, prefer opening the dApp inside Kasperia WebView so the injected provider is available.</div>
+<p>Supported request URLs:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kasperia://wallet/request?payload=&lt;base64url-json&gt;
 https://link.kasperia.app/wallet/request?payload=&lt;base64url-json&gt;</code></pre>
-<p>The current app-side external link implementation supports wallet request routes. Use this mode when the dApp needs to ask Kasperia to perform one specific wallet action and then return the result through a callback URL.</p>
-<div class="callout warning">Do not document an <code>open dApp in app</code> route unless your app has added and tested that route. The supported external routes in this implementation are <code>kasperia://wallet/request</code> and <code>https://link.kasperia.app/wallet/request</code>.</div>
+<div class="callout warning">Only document routes that are already implemented and tested in the app. The currently supported external wallet request routes are <code>kasperia://wallet/request</code> and <code>https://link.kasperia.app/wallet/request</code>.</div>
 <h2 id="external-payload">External Request Payload</h2>
-<p>The external wallet request format is designed for request and callback flows.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> payload = {
-  id: crypto.<span class="hl-fn">randomUUID</span>(),
+<p>The payload is a JSON object encoded as base64url without padding. Each request should have a unique <code>id</code>. Your callback handler must decode <code>walletResponse</code> and verify that the response <code>id</code> matches the request <code>id</code>.</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const payload = {
+  id: crypto.randomUUID(),
   origin: window.location.origin,
-  method: <span class="hl-str">'eth_requestAccounts'</span>,
+  method: 'eth_requestAccounts',
   params: {},
-  callback: <span class="hl-str">`${window.location.origin}/wallet-callback`</span>
+  callback: `${window.location.origin}/wallet-callback`
 };</code></pre>
-<p>Encode the JSON as base64url without padding:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">base64UrlEncodeJson</span>(json) {
-  <span class="hl-kw">const</span> raw = JSON.<span class="hl-fn">stringify</span>(json);
-  <span class="hl-kw">const</span> bytes = <span class="hl-kw">new</span> <span class="hl-fn">TextEncoder</span>().<span class="hl-fn">encode</span>(raw);
-  <span class="hl-kw">let</span> binary = <span class="hl-str">''</span>;
-  bytes.<span class="hl-fn">forEach</span>((b) =&gt; binary += String.<span class="hl-fn">fromCharCode</span>(b));
-  <span class="hl-kw">return</span> <span class="hl-fn">btoa</span>(binary).<span class="hl-fn">replace</span>(/\+/g, <span class="hl-str">'-'</span>).<span class="hl-fn">replace</span>(/\<span class="hl-cmt">//g, '_').replace(/=+$/g, '');</span>
+<p>Encode and open the request:</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function base64UrlEncodeJson(json) {
+  const raw = JSON.stringify(json);
+  const bytes = new TextEncoder().encode(raw);
+  let binary = '';
+  bytes.forEach((b) =&gt; binary += String.fromCharCode(b));
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
 }
 
-<span class="hl-kw">function</span> <span class="hl-fn">openWalletRequest</span>(payload) {
-  <span class="hl-kw">const</span> encoded = <span class="hl-fn">base64UrlEncodeJson</span>(payload);
-  window.location.href = <span class="hl-str">`kasperia://wallet/request?payload=${encoded}`</span>;
+function openKasperiaWalletRequest(payload) {
+  const encoded = base64UrlEncodeJson(payload);
+  window.location.href = `kasperia://wallet/request?payload=${encoded}`;
 }</code></pre>
-<p>Kasperia will send the result back by appending <code>walletResponse</code> to your callback URL:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-cmt">// callback URL example</span>
-https:<span class="hl-cmt">//your-dapp.com/wallet-callback?walletResponse=&lt;base64url-json&gt;</span>
-<span class="hl-cmt">// decoded response example</span>
-{
-  id: <span class="hl-str">'request-id'</span>,
-  success: <span class="hl-kw">true</span>,
-  data: [<span class="hl-str">'0x1234...'</span>]
+<p>Kasperia returns the result by appending <code>walletResponse</code> to your callback URL:</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">https://your-dapp.com/wallet-callback?walletResponse=&lt;base64url-json&gt;</code></pre>
+<p>Decoded success response:</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
+  id: 'request-id',
+  success: true,
+  data: ['0x1234...']
 }</code></pre>
-<div class="callout">Callback URLs must use an allowed scheme such as <code>https</code> or an app scheme. If <code>origin</code> is provided, the callback host should match the origin host.</div>
+<p>Decoded error response:</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
+  id: 'request-id',
+  success: false,
+  error: {
+    code: 4001,
+    message: 'User rejected the request'
+  }
+}</code></pre>
+<div class="callout">Callback URLs must use an allowed scheme such as <code>https</code> or your app scheme. If <code>origin</code> is provided, the callback host should match the origin host.</div>
 <h2 id="mobile-support">Mobile Support Matrix</h2>
 <div class="table-wrap">
 <table>
@@ -236,84 +299,84 @@ https:<span class="hl-cmt">//your-dapp.com/wallet-callback?walletResponse=&lt;ba
 </div>
 <h2 id="kaspa-connect">Connect Wallet</h2>
 <div class="method"><div class="method-head"><span class="method-name">window.kasperia.requestAccounts()</span><span class="method-tag">Kaspa</span></div><p>Requests access to the current Kaspa account. If the site is not authorized, Kasperia shows a Connect Wallet confirmation.</p></div>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">connectKaspaWallet</span>() {
-  <span class="hl-kw">const</span> accounts = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">requestAccounts</span>();
-  <span class="hl-kw">const</span> address = accounts[<span class="hl-kw">class</span>="hl-num"&gt;0];
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Kaspa address:'</span>, address);
-  <span class="hl-kw">return</span> address;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function connectKaspaWallet() {
+  const accounts = await window.kasperia.requestAccounts();
+  const address = accounts[0];
+  console.log('Kaspa address:', address);
+  return address;
 }</code></pre>
 <h4>Returns</h4>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">[<span class="hl-str">'kaspa:...'</span>]
-<span class="hl-cmt">// or</span>
-[<span class="hl-str">'kaspatest:...'</span>]</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">['kaspa:...']
+// or
+['kaspatest:...']</code></pre>
 <h2 id="kaspa-accounts">Accounts</h2>
 <p>After the site is connected, use <code>getAccounts</code> to read the current Kaspa address without opening the connect prompt again.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> accounts = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getAccounts</span>();
-<span class="hl-kw">const</span> current = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({ method: <span class="hl-str">'kasperia_currentAccount'</span> });
-<span class="hl-kw">const</span> publicKey = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getPublicKey</span>();</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const accounts = await window.kasperia.getAccounts();
+const current = await window.kasperia.request({ method: 'kasperia_currentAccount' });
+const publicKey = await window.kasperia.getPublicKey();</code></pre>
 <h4>Current account response</h4>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
-  id: <span class="hl-str">'account-id'</span>,
-  name: <span class="hl-str">'Account 1'</span>,
-  kaspaAddress: <span class="hl-str">'kaspa:...'</span>,
-  evmAddress: <span class="hl-str">'0x...'</span>,
-  publicKey: <span class="hl-str">'...'</span>,
-  isCurrent: <span class="hl-kw">true</span>
+  id: 'account-id',
+  name: 'Account 1',
+  kaspaAddress: 'kaspa:...',
+  evmAddress: '0x...',
+  publicKey: '...',
+  isCurrent: true
 }</code></pre>
 <h2 id="kaspa-network">Network</h2>
 <p>Use <code>getNetwork</code> for the current Kaspa network and <code>getNetworks</code> for all available Kaspa and EVM networks.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> currentKaspaNetwork = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getNetwork</span>();
-<span class="hl-kw">const</span> allNetworks = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getNetworks</span>();</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const currentKaspaNetwork = await window.kasperia.getNetwork();
+const allNetworks = await window.kasperia.getNetworks();</code></pre>
 <p>Switch Kaspa network:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">switchNetwork</span>(<span class="hl-str">'mainnet'</span>);
-<span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">switchNetwork</span>(<span class="hl-str">'testnet-10'</span>);</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">await window.kasperia.switchNetwork('mainnet');
+await window.kasperia.switchNetwork('testnet-10');</code></pre>
 <p>You can also use the generic request form:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_switchNetwork'</span>,
-  params: { type: <span class="hl-str">'kaspa'</span>, network: <span class="hl-str">'testnet-10'</span> }
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">await window.kasperia.request({
+  method: 'kasperia_switchNetwork',
+  params: { type: 'kaspa', network: 'testnet-10' }
 });</code></pre>
 <h2 id="kaspa-balance">Balance</h2>
 <p>Read the current Kaspa account balance. The raw unit is sompi and <code>decimals</code> is <code>8</code>.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> balance = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getBalance</span>();
-console.<span class="hl-fn">log</span>(balance.raw, balance.symbol, balance.decimals);</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const balance = await window.kasperia.getBalance();
+console.log(balance.raw, balance.symbol, balance.decimals);</code></pre>
 <h4>Response</h4>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
-  type: <span class="hl-str">'kaspa'</span>,
-  network: <span class="hl-str">'mainnet'</span>,
-  address: <span class="hl-str">'kaspa:...'</span>,
-  symbol: <span class="hl-str">'KAS'</span>,
-  decimals: <span class="hl-kw">class</span>="hl-num"&gt;8,
-  total: <span class="hl-str">'100000000'</span>,
-  available: <span class="hl-str">'100000000'</span>,
-  pending: <span class="hl-str">'0'</span>,
-  raw: <span class="hl-str">'100000000'</span>
+  type: 'kaspa',
+  network: 'mainnet',
+  address: 'kaspa:...',
+  symbol: 'KAS',
+  decimals: 8,
+  total: '100000000',
+  available: '100000000',
+  pending: '0',
+  raw: '100000000'
 }</code></pre>
 <h2 id="kaspa-send">Send KAS</h2>
 <p>Use <code>sendKaspa</code> to send KAS. The amount must be passed in sompi.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">sendKas</span>() {
-  <span class="hl-kw">const</span> to = <span class="hl-str">'kaspa:qp...'</span>;
-  <span class="hl-kw">const</span> sompi = <span class="hl-str">'100000000'</span>; <span class="hl-cmt">// 1 KAS</span>
-<span class="hl-kw">const</span> txid = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">sendKaspa</span>(to, sompi, {
-    payload: <span class="hl-str">''</span>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function sendKas() {
+  const to = 'kaspa:qp...';
+  const sompi = '100000000'; // 1 KAS
+const txid = await window.kasperia.sendKaspa(to, sompi, {
+    payload: ''
   });
 
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Kaspa txid:'</span>, txid);
+  console.log('Kaspa txid:', txid);
 }</code></pre>
 <p>Generic request form:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> result = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_sendKaspa'</span>,
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const result = await window.kasperia.request({
+  method: 'kasperia_sendKaspa',
   params: {
-    to: <span class="hl-str">'kaspa:qp...'</span>,
-    sompi: <span class="hl-str">'100000000'</span>,
-    payload: <span class="hl-str">''</span>
+    to: 'kaspa:qp...',
+    sompi: '100000000',
+    payload: ''
   }
 });</code></pre>
 <h2 id="kaspa-generic">Generic Request</h2>
 <p><code>window.kasperia.request</code> is the shared low-level request method. It is useful for methods without a convenience wrapper.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> version = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">getVersion</span>();
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const version = await window.kasperia.getVersion();
 
-<span class="hl-kw">const</span> result = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_getNetworks'</span>,
+const result = await window.kasperia.request({
+  method: 'kasperia_getNetworks',
   params: {}
 });</code></pre>
 <div class="table-wrap">
@@ -334,103 +397,103 @@ console.<span class="hl-fn">log</span>(balance.raw, balance.symbol, balance.deci
 </table>
 </div>
 <h2 id="kaspa-events">Kaspa Events</h2>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">window.kasperia.<span class="hl-fn">on</span>(<span class="hl-str">'networkChanged'</span>, (network) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Kaspa network changed:'</span>, network);
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">window.kasperia.on('networkChanged', (network) =&gt; {
+  console.log('Kaspa network changed:', network);
 });
 
-window.kasperia.<span class="hl-fn">on</span>(<span class="hl-str">'accountsChanged'</span>, (accounts) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Kaspa accounts changed:'</span>, accounts);
+window.kasperia.on('accountsChanged', (accounts) =&gt; {
+  console.log('Kaspa accounts changed:', accounts);
 });</code></pre>
 <h2 id="evm-provider">Get EVM Provider</h2>
 <p>Use <code>window.kasperia.ethereum</code> as the recommended EVM provider.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">getEvmProvider</span>() {
-  <span class="hl-kw">if</span> (window.kasperia &amp;&amp; window.kasperia.ethereum) {
-    <span class="hl-kw">return</span> window.kasperia.ethereum;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function getEvmProvider() {
+  if (window.kasperia &amp;&amp; window.kasperia.ethereum) {
+    return window.kasperia.ethereum;
   }
-  <span class="hl-kw">return</span> <span class="hl-kw">null</span>;
+  return null;
 }</code></pre>
 <p>The provider supports <code>request</code>, <code>send</code>, <code>sendAsync</code>, <code>enable</code>, events, <code>selectedAddress</code>, <code>chainId</code>, and <code>networkVersion</code>.</p>
 <h2 id="evm-connect">Connect EVM Account</h2>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">connectEvmWallet</span>() {
-  <span class="hl-kw">const</span> provider = window.kasperia.ethereum;
-  <span class="hl-kw">const</span> accounts = <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({ method: <span class="hl-str">'eth_requestAccounts'</span> });
-  <span class="hl-kw">return</span> accounts[<span class="hl-kw">class</span>="hl-num"&gt;0];
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function connectEvmWallet() {
+  const provider = window.kasperia.ethereum;
+  const accounts = await provider.request({ method: 'eth_requestAccounts' });
+  return accounts[0];
 }</code></pre>
 <p>Read connected EVM accounts without prompting:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> accounts = <span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'eth_accounts'</span>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const accounts = await window.kasperia.ethereum.request({
+  method: 'eth_accounts'
 });</code></pre>
 <h2 id="evm-chain">Get / Switch Chain</h2>
 <p>Read the current EVM chain id. The result is a hex string.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> chainId = <span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'eth_chainId'</span>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const chainId = await window.kasperia.ethereum.request({
+  method: 'eth_chainId'
 });
 
-console.<span class="hl-fn">log</span>(chainId); <span class="hl-cmt">// example: '0x28c64'</span></code></pre>
+console.log(chainId); // example: '0x28c64' = 167012</code></pre>
 <p>Switch EVM chain. Kasperia will show a Switch Network confirmation sheet in the app.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'wallet_switchEthereumChain'</span>,
-  params: [{ chainId: <span class="hl-str">'0x28c64'</span> }]
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">await window.kasperia.ethereum.request({
+  method: 'wallet_switchEthereumChain',
+  params: [{ chainId: '0x28c64' }]
 });</code></pre>
 <p><code>wallet_addEthereumChain</code> is treated as a switch request to an already configured chain. The current app implementation does not add arbitrary new RPC networks from dApp params.</p>
 <h2 id="evm-balance">Get EVM Balance</h2>
 <p>Use <code>eth_getBalance</code> to read the native EVM balance. The result is a hex quantity.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> address = <span class="hl-str">'0x...'</span>;
-<span class="hl-kw">const</span> balanceHex = <span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'eth_getBalance'</span>,
-  params: [address, <span class="hl-str">'latest'</span>]
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const address = '0x...';
+const balanceHex = await window.kasperia.ethereum.request({
+  method: 'eth_getBalance',
+  params: [address, 'latest']
 });</code></pre>
 <p>You can also use the Kasperia generic request form:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> balance = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_getBalance'</span>,
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const balance = await window.kasperia.request({
+  method: 'kasperia_getBalance',
   params: {
-    type: <span class="hl-str">'evm'</span>,
-    address: <span class="hl-str">'0x...'</span>
+    type: 'evm',
+    address: '0x...'
   }
 });</code></pre>
 <h2 id="evm-send">Send EVM Transaction</h2>
 <p>Use <code>eth_sendTransaction</code> for EVM transfers or contract calls. The app will show a transaction confirmation sheet before submitting the transaction.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">sendEvmTransaction</span>() {
-  <span class="hl-kw">const</span> provider = window.kasperia.ethereum;
-  <span class="hl-kw">const</span> [<span class="hl-kw">from</span>] = <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({ method: <span class="hl-str">'eth_requestAccounts'</span> });
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function sendEvmTransaction() {
+  const provider = window.kasperia.ethereum;
+  const [from] = await provider.request({ method: 'eth_requestAccounts' });
 
-  <span class="hl-kw">const</span> txHash = <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({
-    method: <span class="hl-str">'eth_sendTransaction'</span>,
+  const txHash = await provider.request({
+    method: 'eth_sendTransaction',
     params: [{
-      <span class="hl-kw">from</span>,
-      to: <span class="hl-str">'0x0000000000000000000000000000000000000000'</span>,
-      value: <span class="hl-str">'0x0'</span>,
-      data: <span class="hl-str">'0x'</span>
+      from,
+      to: '0x0000000000000000000000000000000000000000',
+      value: '0x0',
+      data: '0x'
     }]
   });
 
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'EVM tx hash:'</span>, txHash);
+  console.log('EVM tx hash:', txHash);
 }</code></pre>
 <div class="callout warning">The <code>from</code> address must match the current Kasperia EVM account. If it does not match, the request will fail with invalid params.</div>
 <p>For native transfers without custom gas or data, you may use the generic request form:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> result = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_sendTransaction'</span>,
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const result = await window.kasperia.request({
+  method: 'kasperia_sendTransaction',
   params: {
-    type: <span class="hl-str">'evm'</span>,
-    to: <span class="hl-str">'0x...'</span>,
-    amount: <span class="hl-str">'0.01'</span>
+    type: 'evm',
+    to: '0x...',
+    amount: '0.01'
   }
 });</code></pre>
 <h2 id="evm-sign">Sign Message</h2>
 <p>The current mobile implementation supports <code>personal_sign</code>.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> provider = window.kasperia.ethereum;
-<span class="hl-kw">const</span> [address] = <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({ method: <span class="hl-str">'eth_requestAccounts'</span> });
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const provider = window.kasperia.ethereum;
+const [address] = await provider.request({ method: 'eth_requestAccounts' });
 
-<span class="hl-kw">const</span> signature = <span class="hl-kw">await</span> provider.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'personal_sign'</span>,
-  params: [<span class="hl-str">'Hello Kasperia'</span>, address]
+const signature = await provider.request({
+  method: 'personal_sign',
+  params: ['Hello Kasperia', address]
 });</code></pre>
 <p>Generic request form:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> signed = <span class="hl-kw">await</span> window.kasperia.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'kasperia_signMessage'</span>,
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const signed = await window.kasperia.request({
+  method: 'kasperia_signMessage',
   params: {
-    message: <span class="hl-str">'Hello Kasperia'</span>,
-    address: <span class="hl-str">'0x...'</span>
+    message: 'Hello Kasperia',
+    address: '0x...'
   }
 });</code></pre>
 <h2 id="evm-readonly">Read-only RPC</h2>
@@ -438,26 +501,26 @@ console.<span class="hl-fn">log</span>(chainId); <span class="hl-cmt">// example
 <div class="badge-row">
 <span class="badge">eth_blockNumber</span><span class="badge">eth_getBlockByNumber</span><span class="badge">eth_getTransactionCount</span><span class="badge">eth_gasPrice</span><span class="badge">eth_estimateGas</span><span class="badge">eth_call</span><span class="badge">eth_getCode</span><span class="badge">eth_getLogs</span><span class="badge">eth_feeHistory</span><span class="badge">eth_maxPriorityFeePerGas</span><span class="badge">eth_getTransactionReceipt</span><span class="badge">eth_getTransactionByHash</span>
 </div>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> blockNumber = <span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-  method: <span class="hl-str">'eth_blockNumber'</span>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const blockNumber = await window.kasperia.ethereum.request({
+  method: 'eth_blockNumber'
 });</code></pre>
 <h2 id="evm-events">EVM Events</h2>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> provider = window.kasperia.ethereum;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const provider = window.kasperia.ethereum;
 
-provider.<span class="hl-fn">on</span>(<span class="hl-str">'accountsChanged'</span>, (accounts) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'EVM accounts changed:'</span>, accounts);
+provider.on('accountsChanged', (accounts) =&gt; {
+  console.log('EVM accounts changed:', accounts);
 });
 
-provider.<span class="hl-fn">on</span>(<span class="hl-str">'chainChanged'</span>, (chainId) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'EVM chain changed:'</span>, chainId);
+provider.on('chainChanged', (chainId) =&gt; {
+  console.log('EVM chain changed:', chainId);
 });
 
-provider.<span class="hl-fn">on</span>(<span class="hl-str">'connect'</span>, ({ chainId }) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Connected:'</span>, chainId);
+provider.on('connect', ({ chainId }) =&gt; {
+  console.log('Connected:', chainId);
 });
 
-provider.<span class="hl-fn">on</span>(<span class="hl-str">'disconnect'</span>, (error) =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'Disconnected:'</span>, error);
+provider.on('disconnect', (error) =&gt; {
+  console.log('Disconnected:', error);
 });</code></pre>
 <h2 id="qr-overview">QR Scan Link Overview</h2>
 <p>Kasperia can scan a QR code, parse its text content, and open the matching app page with pre-filled parameters. QR scan links are intended to guide the user to the correct screen; they do not silently send funds. The user still reviews and confirms the action inside the app.</p>
@@ -514,18 +577,18 @@ provider.<span class="hl-fn">on</span>(<span class="hl-str">'disconnect'</span>,
 <p>Alternative query-style format:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kaspa://transfer?to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5&amp;payload=haha</code></pre>
 <p>Generate a KAS transfer QR string:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">buildKasTransferQr</span>({ to, amount, payload }) {
-  <span class="hl-kw">const</span> params = <span class="hl-kw">new</span> <span class="hl-fn">URLSearchParams</span>();
-  params.<span class="hl-fn">set</span>(<span class="hl-str">'to'</span>, to);
-  <span class="hl-kw">if</span> (amount !== <span class="hl-kw">undefined</span> &amp;&amp; amount !== <span class="hl-str">''</span>) params.<span class="hl-fn">set</span>(<span class="hl-str">'amount'</span>, <span class="hl-fn">String</span>(amount));
-  <span class="hl-kw">if</span> (payload) params.<span class="hl-fn">set</span>(<span class="hl-str">'payload'</span>, payload);
-  <span class="hl-kw">return</span> <span class="hl-str">`kaspa://transfer?${params.toString()}`</span>;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildKasTransferQr({ to, amount, payload }) {
+  const params = new URLSearchParams();
+  params.set('to', to);
+  if (amount !== undefined &amp;&amp; amount !== '') params.set('amount', String(amount));
+  if (payload) params.set('payload', payload);
+  return `kaspa://transfer?${params.toString()}`;
 }
 
-<span class="hl-kw">const</span> qrText = <span class="hl-fn">buildKasTransferQr</span>({
-  to: <span class="hl-str">'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey'</span>,
-  amount: <span  class="hl-kw">class</span>="hl-num"&gt;5,
-  payload: <span class="hl-str">'haha'</span>
+const qrText = buildKasTransferQr({
+  to: 'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey',
+  amount: 5,
+  payload: 'haha'
 });</code></pre>
 <h2 id="qr-app-pages">Kasperia App Pages</h2>
 <p>Use the <code>kasperia://</code> scheme to open supported Kasperia app pages. This is useful for QR codes printed on websites, campaigns, bridge pages, or offline materials.</p>
@@ -557,12 +620,12 @@ provider.<span class="hl-fn">on</span>(<span class="hl-str">'disconnect'</span>,
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">krc20://transfer?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5
 krc20://mint?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5
 krc20://token?tick=JEMES</code></pre>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">buildKrc20TransferQr</span>({ tick, to, amount }) {
-  <span class="hl-kw">const</span> params = <span class="hl-kw">new</span> <span class="hl-fn">URLSearchParams</span>();
-  params.<span class="hl-fn">set</span>(<span class="hl-str">'tick'</span>, tick);
-  <span class="hl-kw">if</span> (to) params.<span class="hl-fn">set</span>(<span class="hl-str">'to'</span>, to);
-  <span class="hl-kw">if</span> (amount !== <span class="hl-kw">undefined</span> &amp;&amp; amount !== <span class="hl-str">''</span>) params.<span class="hl-fn">set</span>(<span class="hl-str">'amount'</span>, <span class="hl-fn">String</span>(amount));
-  <span class="hl-kw">return</span> <span class="hl-str">`krc20://transfer?${params.toString()}`</span>;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildKrc20TransferQr({ tick, to, amount }) {
+  const params = new URLSearchParams();
+  params.set('tick', tick);
+  if (to) params.set('to', to);
+  if (amount !== undefined &amp;&amp; amount !== '') params.set('amount', String(amount));
+  return `krc20://transfer?${params.toString()}`;
 }</code></pre>
 <h2 id="qr-evm">EVM Transfer QR</h2>
 <p>Use the <code>ethereum://transfer</code> scheme to open the EVM Send page. <code>chainId</code> is required. If <code>token</code> is omitted, Kasperia opens the native-token transfer flow for that chain. If <code>token</code> is provided, Kasperia treats it as a contract token address and opens the token transfer flow.</p>
@@ -583,45 +646,45 @@ krc20://token?tick=JEMES</code></pre>
 </div>
 </div>
 <div class="callout warning">The app must have a network configuration matching the scanned <code>chainId</code>. If the chain id is missing or not configured, the app will show an error instead of opening the send page.</div>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">function</span> <span class="hl-fn">buildEvmTransferQr</span>({ chainId, to, amount, token }) {
-  <span class="hl-kw">const</span> params = <span class="hl-kw">new</span> <span class="hl-fn">URLSearchParams</span>();
-  params.<span class="hl-fn">set</span>(<span class="hl-str">'chainId'</span>, <span class="hl-fn">String</span>(chainId));
-  params.<span class="hl-fn">set</span>(<span class="hl-str">'to'</span>, to);
-  <span class="hl-kw">if</span> (amount !== <span class="hl-kw">undefined</span> &amp;&amp; amount !== <span class="hl-str">''</span>) params.<span class="hl-fn">set</span>(<span class="hl-str">'amount'</span>, <span class="hl-fn">String</span>(amount));
-  <span class="hl-kw">if</span> (token) params.<span class="hl-fn">set</span>(<span class="hl-str">'token'</span>, token);
-  <span class="hl-kw">return</span> <span class="hl-str">`ethereum://transfer?${params.toString()}`</span>;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildEvmTransferQr({ chainId, to, amount, token }) {
+  const params = new URLSearchParams();
+  params.set('chainId', String(chainId));
+  params.set('to', to);
+  if (amount !== undefined &amp;&amp; amount !== '') params.set('amount', String(amount));
+  if (token) params.set('token', token);
+  return `ethereum://transfer?${params.toString()}`;
 }</code></pre>
 <h2 id="qr-dapp">Open dApp URL QR</h2>
 <p>If the scanned QR content is a normal web URL, Kasperia opens it inside the app WebView. The dApp can then use <code>window.kasperia</code> and <code>window.kasperia.ethereum</code> after provider injection.</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">https://kas.fun/
 https://kasbridge-tn10evm-m.kaspafoundation.org/</code></pre>
 <p>Recommended dApp behavior after being opened from a QR:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">async</span> <span class="hl-kw">function</span> <span class="hl-fn">initAfterQrOpen</span>() {
-  <span class="hl-kw">const</span> wallet = <span class="hl-kw">await</span> <span class="hl-fn">ensureKasperiaReady</span>();
-  <span class="hl-kw">const</span> accounts = <span class="hl-kw">await</span> wallet.<span class="hl-fn">requestAccounts</span>();
-  <span class="hl-kw">const</span> network = <span class="hl-kw">await</span> wallet.<span class="hl-fn">getNetwork</span>();
-  <span class="hl-kw">return</span> { accounts, network };
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function initAfterQrOpen() {
+  const wallet = await ensureKasperiaReady();
+  const accounts = await wallet.requestAccounts();
+  const network = await wallet.getNetwork();
+  return { accounts, network };
 }</code></pre>
 <h2 id="qr-builder">QR Builder Examples</h2>
 <p>Developers can generate QR codes with any QR library as long as the encoded content is the exact plain-text link.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">import</span> QRCode <span class="hl-kw">from</span> <span class="hl-str">'qrcode'</span>;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">import QRCode from 'qrcode';
 
-<span class="hl-kw">const</span> qrText = <span class="hl-str">'krc20://transfer?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5'</span>;
-<span class="hl-kw">const</span> dataUrl = <span class="hl-kw">await</span> QRCode.<span class="hl-fn">toDataURL</span>(qrText);
+const qrText = 'krc20://transfer?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5';
+const dataUrl = await QRCode.toDataURL(qrText);
 
-document.<span class="hl-fn">querySelector</span>(<span class="hl-str">'#qr'</span>).src = dataUrl;</code></pre>
+document.querySelector('#qr').src = dataUrl;</code></pre>
 <p>Plain JavaScript helper for building links safely:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">const</span> KAS_TEST_ADDRESS = <span class="hl-str">'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey'</span>;
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const KAS_TEST_ADDRESS = 'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey';
 
-<span class="hl-kw">const</span> examples = {
+const examples = {
   kasWithoutAmount: KAS_TEST_ADDRESS,
-  kasWithAmount: <span class="hl-str">`${KAS_TEST_ADDRESS}&amp;amount=5`</span>,
-  kasWithPayload: <span class="hl-str">`${KAS_TEST_ADDRESS}&amp;amount=5&amp;payload=${encodeURIComponent('haha afasdfsdafasdf')}`</span>,
-  bridge: <span class="hl-str">`kasperia://bridge?to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`</span>,
-  krc20Transfer: <span class="hl-str">`krc20://transfer?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`</span>,
-  krc20Mint: <span class="hl-str">`krc20://mint?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`</span>,
-  evmTransfer: <span class="hl-str">'ethereum://transfer?chainId=56&amp;to=0xEe461548B7CA5b4A1C9E4c078054BD047b8786c1&amp;amount=1.5'</span>,
-  dapp: <span class="hl-str">'https://kas.fun/'</span>
+  kasWithAmount: `${KAS_TEST_ADDRESS}&amp;amount=5`,
+  kasWithPayload: `${KAS_TEST_ADDRESS}&amp;amount=5&amp;payload=${encodeURIComponent('haha afasdfsdafasdf')}`,
+  bridge: `kasperia://bridge?to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
+  krc20Transfer: `krc20://transfer?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
+  krc20Mint: `krc20://mint?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
+  evmTransfer: 'ethereum://transfer?chainId=56&amp;to=0xEe461548B7CA5b4A1C9E4c078054BD047b8786c1&amp;amount=1.5',
+  dapp: 'https://kas.fun/'
 };</code></pre>
 <h2 id="qr-notes">Validation Notes</h2>
 <ol>
@@ -636,15 +699,15 @@ document.<span class="hl-fn">querySelector</span>(<span class="hl-str">'#qr'</sp
 <h2 id="network-reference">Network Reference</h2>
 <p>Use <code>window.kasperia.getNetworks()</code> to get the exact networks configured in the current app build. A network item may include the following fields:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
-  type: <span class="hl-str">'evm'</span>,
-  id: <span class="hl-str">'166980'</span>,
-  name: <span class="hl-str">'Kasplex L2 Testnet'</span>,
-  isCurrent: <span class="hl-kw">true</span>,
-  chainId: <span class="hl-kw">class</span>="hl-num"&gt;166980,
-  rpcUrl: <span class="hl-str">'https://...'</span>,
-  explorerUrl: <span class="hl-str">'https://...'</span>,
-  symbol: <span class="hl-str">'KAS'</span>,
-  decimals: <span class="hl-kw">class</span>="hl-num"&gt;18
+  type: 'evm',
+  id: '167012',
+  name: 'Kasplex L2 Testnet',
+  isCurrent: true,
+  chainId: 167012,
+  rpcUrl: 'https://...',
+  explorerUrl: 'https://...',
+  symbol: 'KAS',
+  decimals: 18
 }</code></pre>
 <div class="callout">Do not hard-code chain ids unless your dApp only supports a fixed network. Prefer reading <code>getNetworks()</code> and then switching to a chain that exists in the returned list.</div>
 <h2 id="error-codes">Error Codes</h2>
@@ -661,16 +724,16 @@ document.<span class="hl-fn">querySelector</span>(<span class="hl-str">'#qr'</sp
 </tbody>
 </table>
 </div>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js"><span class="hl-kw">try</span> {
-  <span class="hl-kw">await</span> window.kasperia.ethereum.<span class="hl-fn">request</span>({
-    method: <span class="hl-str">'wallet_switchEthereumChain'</span>,
-    params: [{ chainId: <span class="hl-str">'0x28c64'</span> }]
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">try {
+  await window.kasperia.ethereum.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: '0x28c64' }]
   });
-} <span class="hl-kw">catch</span> (error) {
-  <span class="hl-kw">if</span> (error.code === <span class="hl-kw">class</span>="hl-num"&gt;4001) {
-    console.<span class="hl-fn">log</span>(<span class="hl-str">'User rejected the request'</span>);
-  } <span class="hl-kw">else</span> {
-    console.<span class="hl-fn">error</span>(error.code, error.message, error.data);
+} catch (error) {
+  if (error.code === 4001) {
+    console.log('User rejected the request');
+  } else {
+    console.error(error.code, error.message, error.data);
   }
 }</code></pre>
 <h2 id="best-practices">Best Practices</h2>

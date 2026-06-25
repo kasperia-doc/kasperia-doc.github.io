@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Kasperia External Wallet Link Test</title>
+  <style>
+    :root {
+      --bg: #f6fafb;
+      --card: #ffffff;
+      --card2: #f8fbfc;
+      --border: #e4eef0;
+      --text: #0b1e22;
+      --muted: #587075;
+      --primary: #00d5ff;
+      --accent: #1be4b0;
+      --danger: #ef4444;
+      --warning: #facc15;
+      --blue: #0ea5e9;
+      --code: #0b1e22;
+      --codeText: #d6f6ff;
+      --shadow: 0 12px 30px rgba(7,31,35,.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(80% 80% at 0% 0%, rgba(0, 213, 255, .16), transparent 42%),
+        radial-gradient(70% 70% at 100% 0%, rgba(27, 228, 176, .13), transparent 42%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .page { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 22px 0 34px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .brand { font-weight: 900; letter-spacing: .04em; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 8px 10px; border-radius: 10px; }
+    .nav a.active { color: var(--text); background: rgba(0, 213, 255, .12); font-weight: 700; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card h1 { font-size: clamp(25px, 4vw, 40px); line-height: 1.12; margin: 10px 0 10px; }
+    .card h2 { font-size: 17px; margin: 0 0 14px; }
+    .card p, .hint { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+    .badge { display: inline-flex; font-size: 12px; color: #04758a; background: #e7faff; border: 1px solid #c9f4fb; border-radius: 999px; padding: 5px 10px; font-weight: 700; }
+    .pill { display: none; color: #096449; background: rgba(27, 228, 176, .13); border: 1px solid rgba(27, 228, 176, .26); padding: 8px 10px; border-radius: 999px; font-size: 12px; margin-bottom: 12px; font-weight: 700; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .grid .card { margin-bottom: 0; }
+    .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+    label { display: block; color: var(--muted); font-size: 12px; font-weight: 700; margin: 0 0 6px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card2);
+      color: var(--text);
+      padding: 11px 12px;
+      outline: none;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    textarea { min-height: 82px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(0,213,255,.7); box-shadow: 0 0 0 3px rgba(0,213,255,.12); }
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      border: none;
+      border-radius: 12px;
+      margin: 0 0 10px;
+      padding: 0 12px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: #06333a;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    button:active { transform: translateY(1px); opacity: .82; }
+    button.secondary { background: #eef5f6; color: var(--text); border: 1px solid var(--border); }
+    button.danger { background: var(--danger); color: #fff; }
+    button.warning { background: var(--warning); color: #111827; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    pre {
+      min-height: 260px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--code);
+      color: var(--codeText);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow: auto;
+      margin: 0;
+    }
+    .status { color: var(--blue); font-size: 13px; margin-top: 10px; font-weight: 700; }
+    .small { color: var(--muted); font-size: 12px; }
+    .section-title { margin: 8px 0 14px; font-size: 20px; }
+
+    @media (max-width: 860px) {
+      .hero, .grid, .row, .btn-row { grid-template-columns: 1fr; }
+      .page { width: min(100vw - 24px, 1120px); padding-top: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <div class="brand">KASPERIA External Request</div>
+      <nav class="nav">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html#demo">API Docs</a>
+        <a href="app-in.html">In-App API</a>
+        <a class="active" href="app-out.html">External App</a>
+        <a href="qr-links.html">QR Links</a>
+      </nav>
+    </div>
+
+    <section class="hero">
+      <div class="card">
+        <span class="badge">kasperia://wallet/request</span>
+        <h1>External Wallet Request Test</h1>
+        <p>This page does not depend on common.js. It directly uses the wallet request payload format that can open the Kasperia App. When you click a button, the page builds <b>kasperia://wallet/request?payload=...</b>. After the user confirms in the app, the result is returned to the callback URL as <b>walletResponse</b>.</p>
+        <p class="small">For callback testing, deploy this page over HTTPS. Avoid testing callbacks from local file:// pages because the app may not be able to return to a file URL.</p>
+      </div>
+
+      <div class="card">
+        <h2>Base Config</h2>
+        <div class="pill" id="pendingPill">Waiting for Kasperia callback...</div>
+
+        <label>Use Link Type</label>
+        <select id="linkType">
+          <option value="scheme">Custom Scheme: kasperia://</option>
+          <option value="universal">Universal Link: https://link.kasperia.app</option>
+        </select>
+
+        <label>Callback URL</label>
+        <input id="callbackUrl" />
+        <p class="hint">The current page URL is used by default. payload.origin is derived from the callback origin to avoid host mismatch during app callback.</p>
+
+        <div class="btn-row">
+          <button class="secondary" onclick="copyLastOpenUrl()">Copy Last Open URL</button>
+          <button class="secondary" onclick="clearPendingRequest()">Clear Pending</button>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Permission / Account</h2>
+    <section class="grid">
+      <div class="card">
+        <h2>Kaspa Account</h2>
+        <button onclick="requestKaspaAccounts()">Kaspa requestAccounts</button>
+        <button class="secondary" onclick="getKaspaAccounts()">Kaspa getAccounts</button>
+        <button class="secondary" onclick="getKaspaNetwork()">Kaspa getNetwork</button>
+        <button class="secondary" onclick="getKaspaBalance()">Kaspa getBalance</button>
+      </div>
+      <div class="card">
+        <h2>EVM Account</h2>
+        <button onclick="requestEvmAccounts()">EVM eth_requestAccounts</button>
+        <button class="secondary" onclick="getEvmAccounts()">EVM eth_accounts</button>
+        <button class="secondary" onclick="getEvmChainId()">EVM eth_chainId</button>
+        <button class="secondary" onclick="getEvmBalance()">EVM eth_getBalance</button>
+      </div>
+    </section>
+
+    <h2 class="section-title">Network</h2>
+    <section class="grid">
+      <div class="card">
+        <h2>Kaspa Network</h2>
+        <label>Network</label>
+        <select id="kaspaNetwork">
+          <option value="mainnet">mainnet</option>
+          <option value="testnet-10" selected>testnet-10</option>
+        </select>
+        <button class="warning" onclick="switchKaspaNetwork()">Kaspa switchNetwork</button>
+      </div>
+      <div class="card">
+        <h2>EVM Network</h2>
+        <label>Chain ID Decimal</label>
+        <input id="evmChainId" value="97" />
+        <p class="hint">97 = BSC Testnet. For Kasplex L2 testing, replace it with the matching chainId.</p>
+        <button class="warning" onclick="switchEvmNetwork()">EVM wallet_switchEthereumChain</button>
+      </div>
+    </section>
+
+    <h2 class="section-title">Sign / Transaction</h2>
+    <section class="grid">
+      <div class="card">
+        <h2>Kaspa Sign Message</h2>
+        <label>Message</label>
+        <input id="kaspaSignMsg" value="hello kasperia" />
+        <button onclick="signKaspaMessage()">kasperia_signMessage</button>
+      </div>
+
+      <div class="card">
+        <h2>EVM personal_sign</h2>
+        <label>Address Optional</label>
+        <input id="evmSignAddress" placeholder="0x... current wallet address, optional" />
+        <label>Message</label>
+        <input id="evmSignMsg" value="hello kasperia evm" />
+        <button onclick="signEvmMessage()">personal_sign</button>
+      </div>
+
+      <div class="card">
+        <h2>Send Kaspa</h2>
+        <label>To Address</label>
+        <input id="kaspaTo" value="kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl" />
+        <label>Sompi Amount</label>
+        <input id="kaspaSompi" value="100000000" />
+        <label>Payload Optional</label>
+        <input id="kaspaPayload" placeholder="Optional payload" />
+        <button class="danger" onclick="sendKaspa()">kasperia_sendKaspa</button>
+      </div>
+
+      <div class="card">
+        <h2>EVM Send Transaction</h2>
+        <label>From Optional</label>
+        <input id="evmFrom" placeholder="0x... optional" />
+        <label>To Address</label>
+        <input id="evmTo" value="0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF" />
+        <label>Value Wei Hex</label>
+        <input id="evmValue" value="0x0" />
+        <label>Data</label>
+        <textarea id="evmData">0x</textarea>
+        <button class="danger" onclick="sendEvmTransaction()">eth_sendTransaction</button>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px;">
+      <h2>Custom Request</h2>
+      <div class="row">
+        <div>
+          <label>Method</label>
+          <input id="customMethod" value="kasperia_getNetwork" />
+        </div>
+        <div>
+          <label>Params JSON</label>
+          <textarea id="customParams">{}</textarea>
+        </div>
+      </div>
+      <button class="secondary" onclick="customRequest()">Open Custom Request</button>
+    </section>
+
+    <section class="card">
+      <h2>Generated / Callback Result</h2>
+      <pre id="result">Waiting...</pre>
+      <div class="status" id="status">Ready</div>
+    </section>
+  </main>
+
+  <script>
+    const PENDING_KEY = "kasperia_pending_request_v2";
+    let lastOpenUrl = "";
+
+    function $(id) { return document.getElementById(id); }
+
+    function show(data) {
+      $("result").textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
+    function setStatus(text) { $("status").textContent = text; }
+    function setPendingVisible(visible) { $("pendingPill").style.display = visible ? "inline-flex" : "none"; }
+
+    function createRequestId() {
+      return "req_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+    }
+
+    function encodeBase64Url(json) {
+      const raw = JSON.stringify(json);
+      const encoded = btoa(unescape(encodeURIComponent(raw)));
+      return encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function decodeBase64Url(value) {
+      let normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+      while (normalized.length % 4) normalized += "=";
+      const raw = decodeURIComponent(escape(atob(normalized)));
+      return JSON.parse(raw);
+    }
+
+    function currentPageUrl() {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        return location.origin + location.pathname;
+      }
+      return "https://example.com/kasperia-callback";
+    }
+
+    function getCallbackUrl() {
+      const input = $("callbackUrl").value.trim();
+      return input || currentPageUrl();
+    }
+
+    function getOriginFromCallback(callback) {
+      try {
+        const uri = new URL(callback);
+        return uri.origin;
+      } catch (_) {
+        return location.origin && location.origin !== "null" ? location.origin : "external-page";
+      }
+    }
+
+    function buildKasperiaUrl(method, params) {
+      const callback = getCallbackUrl();
+      const payload = {
+        id: createRequestId(),
+        origin: getOriginFromCallback(callback),
+        method: method,
+        params: params || {},
+        callback: callback
+      };
+
+      const encoded = encodeBase64Url(payload);
+      const linkType = $("linkType").value;
+      const url = linkType === "universal"
+        ? "https://link.kasperia.app/wallet/request?payload=" + encoded
+        : "kasperia://wallet/request?payload=" + encoded;
+
+      return { url, payload };
+    }
+
+    function savePendingRequest(built) {
+      localStorage.setItem(PENDING_KEY, JSON.stringify({
+        id: built.payload.id,
+        method: built.payload.method,
+        params: built.payload.params,
+        callback: built.payload.callback,
+        origin: built.payload.origin,
+        url: built.url,
+        createdAt: Date.now()
+      }));
+      setPendingVisible(true);
+    }
+
+    function getPendingRequest() {
+      const raw = localStorage.getItem(PENDING_KEY);
+      if (!raw) return null;
+      try { return JSON.parse(raw); } catch (_) { return null; }
+    }
+
+    function clearPendingRequest() {
+      localStorage.removeItem(PENDING_KEY);
+      setPendingVisible(false);
+      setStatus("Pending state cleared.");
+      show("Pending state cleared.");
+    }
+
+    function openKasperia(method, params) {
+      const built = buildKasperiaUrl(method, params);
+      lastOpenUrl = built.url;
+      savePendingRequest(built);
+
+      show({
+        status: "Opening Kasperia App",
+        message: "Please approve the request in Kasperia App.",
+        opening: built.url,
+        payload: built.payload
+      });
+      setStatus("Waiting for Kasperia App approval...");
+
+      // Keep this assignment inside the user click call stack.
+      window.location.href = built.url;
+
+      setTimeout(function () {
+        const pending = getPendingRequest();
+        if (pending && !document.hidden) {
+          setStatus("Kasperia App may not have opened, or callback was not received.");
+          show({
+            warning: "No callback received yet.",
+            tips: [
+              "Use this page from http/https, not file://, if you need callback testing.",
+              "Try Custom Scheme first on mobile: kasperia://wallet/request?payload=...",
+              "If callback does not return, make sure callback host matches payload.origin.",
+              "Copy Last Open URL and paste it into the mobile browser address bar to test scheme handling."
+            ],
+            pendingRequest: pending,
+            lastOpenUrl: lastOpenUrl
+          });
+        }
+      }, 2600);
+    }
+
+    async function copyText(text) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_) {}
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return ok;
+    }
+
+    async function copyLastOpenUrl() {
+      if (!lastOpenUrl) {
+        const pending = getPendingRequest();
+        if (pending && pending.url) lastOpenUrl = pending.url;
+      }
+      if (!lastOpenUrl) {
+        show("No open URL yet.");
+        return;
+      }
+      const ok = await copyText(lastOpenUrl);
+      setStatus(ok ? "Copied last open URL." : "Copy failed. URL displayed above.");
+      if (!ok) show(lastOpenUrl);
+    }
+
+    function readCallbackResponse() {
+      const params = new URLSearchParams(location.search);
+      const encoded = params.get("walletResponse");
+
+      if (!encoded) {
+        const pending = getPendingRequest();
+        if (pending) {
+          setPendingVisible(true);
+          setStatus("Waiting for Kasperia callback...");
+          show({ pending: true, message: "A wallet request was opened. Waiting for callback.", request: pending });
+        } else {
+          setPendingVisible(false);
+          setStatus("No callback response found.");
+        }
+        return;
+      }
+
+      try {
+        const response = decodeBase64Url(encoded);
+        localStorage.removeItem(PENDING_KEY);
+        setPendingVisible(false);
+        show({ callbackReceived: true, response: response });
+        setStatus("Callback response received.");
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, location.origin + location.pathname);
+        }
+      } catch (e) {
+        show({ callbackReceived: true, error: "Invalid walletResponse", raw: encoded, message: String(e) });
+        setStatus("Callback parse failed.");
+      }
+    }
+
+    function requestKaspaAccounts() { openKasperia("kasperia_requestAccounts", {}); }
+    function getKaspaAccounts() { openKasperia("kasperia_accounts", {}); }
+    function getKaspaBalance() { openKasperia("kasperia_getBalance", {}); }
+    function getKaspaNetwork() { openKasperia("kasperia_getNetwork", {}); }
+
+    function switchKaspaNetwork() {
+      openKasperia("kasperia_switchNetwork", { network: $("kaspaNetwork").value });
+    }
+
+    function signKaspaMessage() {
+      openKasperia("kasperia_signMessage", { message: $("kaspaSignMsg").value.trim() });
+    }
+
+    function sendKaspa() {
+      const to = $("kaspaTo").value.trim();
+      const sompi = $("kaspaSompi").value.trim();
+      const payload = $("kaspaPayload").value.trim();
+      if (!to) return show({ error: "Missing Kaspa to address" });
+      if (!sompi) return show({ error: "Missing sompi amount" });
+
+      // Keep args format for compatibility with the working external request flow.
+      openKasperia("kasperia_sendKaspa", {
+        args: [to, sompi, payload ? { payload: payload } : {}]
+      });
+    }
+
+    function requestEvmAccounts() { openKasperia("eth_requestAccounts", { params: [] }); }
+    function getEvmAccounts() { openKasperia("eth_accounts", { params: [] }); }
+    function getEvmChainId() { openKasperia("eth_chainId", { params: [] }); }
+    function getEvmBalance() { openKasperia("eth_getBalance", { params: [] }); }
+
+    function switchEvmNetwork() {
+      const chainId = Number($("evmChainId").value);
+      if (!chainId) return show({ error: "Invalid chainId" });
+      openKasperia("wallet_switchEthereumChain", { params: [{ chainId: "0x" + chainId.toString(16) }] });
+    }
+
+    function signEvmMessage() {
+      const message = $("evmSignMsg").value.trim();
+      const address = $("evmSignAddress").value.trim();
+      const params = address ? [message, address] : [message];
+      openKasperia("personal_sign", { params: params });
+    }
+
+    function sendEvmTransaction() {
+      const from = $("evmFrom").value.trim();
+      const to = $("evmTo").value.trim();
+      const value = $("evmValue").value.trim();
+      const data = $("evmData").value.trim();
+      if (!to) return show({ error: "Missing EVM to address" });
+      const tx = { to: to, value: value || "0x0", data: data || "0x" };
+      if (from) tx.from = from;
+      openKasperia("eth_sendTransaction", { params: [tx] });
+    }
+
+    function customRequest() {
+      const method = $("customMethod").value.trim();
+      const rawParams = $("customParams").value.trim();
+      if (!method) return show({ error: "Missing method" });
+      let params = {};
+      try { params = rawParams ? JSON.parse(rawParams) : {}; }
+      catch (e) { return show({ error: "Params JSON is invalid", message: String(e) }); }
+      openKasperia(method, params);
+    }
+
+    function init() {
+      $("callbackUrl").value = currentPageUrl();
+      readCallbackResponse();
+    }
+
+    init();
+  </script>
+</body>
+</html>

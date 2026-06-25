@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasperia In-App API Test</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <div class="brand">KASPERIA In-App API</div>
+      <nav class="nav">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html#demo">API Docs</a>
+        <a class="active" href="app-in.html">In-App API</a>
+        <a href="app-out.html">External App</a>
+        <a href="qr-links.html">QR Links</a>
+      </nav>
+    </div>
+    <section class="hero">
+      <div class="card">
+        <span class="badge">window.kasperia</span>
+        <h1>In-App API Test</h1>
+        <p>Open this page inside the Kasperia App WebView. The app injects <code>window.kasperia</code>, and the EVM provider is available at <code>window.kasperia.ethereum</code>.</p>
+      </div>
+      <div class="card">
+        <h2>Provider Check</h2>
+        <div class="actions">
+          <button onclick="checkProvider()">Check Provider</button>
+          <button class="secondary" onclick="clearLog()">Clear Log</button>
+        </div>
+        <div id="log" class="result">Waiting...</div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Wallet Provider Tests</h2>
+    <section class="grid">
+      <div class="card">
+        <h2>Kaspa Native API</h2>
+        <p>Test wallet connection, address, balance, network, network switching, message signing, and KAS transfer. The transfer call returns a txid after confirmation.</p>
+        <div class="actions">
+          <button onclick="kasConnect()">Connect Wallet</button>
+          <button onclick="kasGetAccounts()">Get Address</button>
+          <button onclick="kasGetBalance()">Get Balance</button>
+          <button onclick="kasGetNetwork()">Get Network</button>
+          <button onclick="kasGetPublicKey()">Get Public Key</button>
+        </div>
+        <div class="form-row"><label>Switch Network</label><select id="kasNetwork"><option value="mainnet">mainnet</option><option value="testnet" selected>testnet</option></select></div>
+        <div class="actions"><button onclick="kasSwitchNetwork()">Switch Kaspa Network</button></div>
+        <div class="form-row"><label>Sign Message</label><input id="kasMessage" value="hello kasperia"></div>
+        <div class="actions"><button onclick="kasSignMessage()">Sign Message</button></div>
+        <div class="form-row"><label>To Address</label><input id="kasTo" value="kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl"></div>
+        <div class="form-row"><label>Amount Sompi</label><input id="kasSompi" value="100000"></div>
+        <div class="form-row"><label>Payload</label><input id="kasPayload" value="hello"></div>
+        <div class="actions"><button onclick="kasSendKaspa()">Send KAS</button></div>
+      </div>
+
+      <div class="card">
+        <h2>EVM API</h2>
+        <p>Test the EIP-1193 provider: connect, accounts, balance, chainId, network switching, message signing, and transaction sending. The send call returns a tx hash after confirmation.</p>
+        <div class="actions">
+          <button onclick="evmConnect()">Connect EVM</button>
+          <button onclick="evmAccounts()">Get EVM Address</button>
+          <button onclick="evmChainId()">Get Chain ID</button>
+        </div>
+        <div class="form-row"><label>Balance Address</label><input id="evmBalanceAddress" placeholder="0x..."></div>
+        <div class="actions"><button onclick="evmGetBalance()">Get EVM Balance</button></div>
+        <div class="form-row"><label>Switch Chain</label><input id="evmChain" value="0x61"></div>
+        <div class="actions"><button onclick="evmSwitchChain()">Switch EVM Chain</button></div>
+        <div class="form-row"><label>Sign Message</label><input id="evmMessage" value="hello kasperia evm"></div>
+        <div class="actions"><button onclick="evmPersonalSign()">personal_sign</button></div>
+        <div class="form-row"><label>From</label><input id="evmFrom" placeholder="0x... current wallet address"></div>
+        <div class="form-row"><label>To</label><input id="evmTo" value="0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF"></div>
+        <div class="form-row"><label>Value ETH</label><input id="evmValue" value="0"></div>
+        <div class="form-row"><label>Data</label><input id="evmData" value="0x"></div>
+        <div class="actions"><button onclick="evmSendTransaction()">Send EVM Tx</button></div>
+      </div>
+    </section>
+  </main>
+  <script src="./js/common.js"></script>
+  <script>
+    function clearLog() { $('log').textContent = ''; }
+    function checkProvider() {
+      logTo('log', 'Provider', {
+        hasWindowKasperia: !!window.kasperia,
+        isKasperia: !!(window.kasperia && window.kasperia.isKasperia),
+        hasEthereum: !!(window.kasperia && window.kasperia.ethereum),
+        kasperiaKeys: window.kasperia ? Object.keys(window.kasperia).sort() : []
+      });
+    }
+    async function run(title, fn) { try { logTo('log', title, await fn()); } catch (e) { logTo('log', title + ' ERROR', { message: e.message, code: e.code, data: e.data }); } }
+    function kasWallet() { const w = getKasperia(); if (!w) throw new Error('window.kasperia is not available. Open this page inside Kasperia App.'); return w; }
+    function evmProvider() { const p = getKasperiaEthereum(); if (!p) throw new Error('window.kasperia.ethereum is not available.'); return p; }
+    function kasConnect() { run('kasperia.requestAccounts', () => kasWallet().requestAccounts()); }
+    function kasGetAccounts() { run('kasperia.getAccounts', () => kasWallet().getAccounts()); }
+    function kasGetBalance() { run('kasperia.getBalance', () => kasWallet().getBalance()); }
+    function kasGetNetwork() { run('kasperia.getNetwork', () => kasWallet().getNetwork()); }
+    function kasGetPublicKey() { run('kasperia.getPublicKey', () => kasWallet().getPublicKey()); }
+    function kasSwitchNetwork() { run('kasperia.switchNetwork', () => kasWallet().switchNetwork($('kasNetwork').value)); }
+    function kasSignMessage() { run('kasperia.signMessage', () => kasWallet().signMessage($('kasMessage').value)); }
+    function kasSendKaspa() {
+      run('kasperia.sendKaspa txid', () => kasWallet().sendKaspa($('kasTo').value, Number($('kasSompi').value || '0'), { payload: $('kasPayload').value || '' }));
+    }
+    function evmConnect() { run('eth_requestAccounts', () => evmProvider().request({ method: 'eth_requestAccounts' })); }
+    function evmAccounts() { run('eth_accounts', () => evmProvider().request({ method: 'eth_accounts' })); }
+    function evmChainId() { run('eth_chainId', () => evmProvider().request({ method: 'eth_chainId' })); }
+    async function getFirstEvmAccount() { const list = await evmProvider().request({ method: 'eth_accounts' }); return Array.isArray(list) ? list[0] : ''; }
+    async function evmGetBalance() {
+      run('eth_getBalance', async () => {
+        const address = $('evmBalanceAddress').value || await getFirstEvmAccount();
+        return evmProvider().request({ method: 'eth_getBalance', params: [address, 'latest'] });
+      });
+    }
+    function evmSwitchChain() { run('wallet_switchEthereumChain', () => evmProvider().request({ method: 'wallet_switchEthereumChain', params: [{ chainId: $('evmChain').value }] })); }
+    async function evmPersonalSign() {
+      run('personal_sign', async () => {
+        const address = $('evmFrom').value || await getFirstEvmAccount();
+        return evmProvider().request({ method: 'personal_sign', params: [$('evmMessage').value, address] });
+      });
+    }
+    async function evmSendTransaction() {
+      run('eth_sendTransaction tx hash', async () => {
+        const from = $('evmFrom').value || await getFirstEvmAccount();
+        return evmProvider().request({
+          method: 'eth_sendTransaction',
+          params: [{ from, to: $('evmTo').value, value: toHexWei($('evmValue').value), data: $('evmData').value || '0x' }]
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>KASPERIA — Wallet API Docs</title>
 <link href="./assets/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-<link href="./css/style.css?v=1.0.2" rel="stylesheet"/>
+<link href="./css/style.css?v=1.0.6" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -14,7 +14,8 @@
 <a class="brand" href="index.html"><img alt="Kasperia" src="./assets/logo.png"/><strong>KASPERIA</strong></a>
 <nav class="nav-links" id="navLinks">
 <a href="index.html">Home</a>
-<a class="active" href="./docs.html?v=1.0.2">API Docs</a>
+<a class="active" href="./docs.html?v=1.0.7">API Docs</a>
+<a href="./docs.html#demo">Demo</a>
 <a href="https://chromewebstore.google.com/detail/kasperia/ffalcabgggegkejjlknofllbaledgcob?hl=zh-CN&amp;utm_source=ext_sidebar" rel="noopener" target="_blank">Download</a>
 <span class="nav-underline"></span>
 </nav>
@@ -31,6 +32,13 @@
 <a class="toc-sub" href="#integration-modes">Integration Modes</a>
 <a class="toc-sub" href="#provider-objects">Provider Objects</a>
 <a class="toc-sub" href="#quick-start">Quick Start</a>
+</details>
+<details class="toc-group" open="">
+<summary><span><span class="toc-label">Demo</span><span class="toc-desc">Runnable test pages</span></span></summary>
+<a class="toc-sub" href="#demo">Demo Entry</a>
+<a class="toc-sub" href="./demo/app-in.html">In-App API Demo</a>
+<a class="toc-sub" href="./demo/app-out.html">External Request Demo</a>
+<a class="toc-sub" href="./demo/qr-links.html">QR Links Demo</a>
 </details>
 <details class="toc-group" open="">
 <summary><span><span class="toc-label">Mobile App</span><span class="toc-desc">App WebView and deep link</span></span></summary>
@@ -205,6 +213,14 @@ async function switchKaspaToTestnet10() {
   return await wallet.getNetwork();
 }</code></pre>
 <div class="callout warning">Do not trigger connect, switch network, signing, or transaction requests on page load. These requests should be started by a direct user action, such as clicking a Connect, Switch, Sign, or Send button.</div>
+<h2 id="demo">Demo Test Pages</h2>
+<p>Use these demo pages inside the same Kasperia web project to test provider injection, external wallet request callbacks, and QR scan links. The demo pages are stored under <code>/demo/</code>; the separate demo home page is intentionally not included.</p>
+<div class="cards demo-entry-cards">
+<div class="card"><h3>In-App API Demo</h3><p>Open this page inside the Kasperia App WebView to test <code>window.kasperia</code> and <code>window.kasperia.ethereum</code>.</p><p><a class="demo-link" href="./demo/app-in.html">Open In-App API Demo</a></p></div>
+<div class="card"><h3>External Request Demo</h3><p>Open this page from a mobile browser to build <code>kasperia://wallet/request</code> or universal-link requests and receive callback results.</p><p><a class="demo-link" href="./demo/app-out.html">Open External Request Demo</a></p></div>
+<div class="card"><h3>QR Links Demo</h3><p>Generate and copy supported scan-link examples for Bridge, KAS, KRC20, EVM, and dApp URL flows.</p><p><a class="demo-link" href="./demo/qr-links.html">Open QR Links Demo</a></p></div>
+</div>
+<div class="callout">Default test recipients used in the demo: <code>kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl</code> for Kaspa / KRC20 / Bridge tests, and <code>0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF</code> for EVM tests.</div>
 <h2 id="mobile-overview">Mobile Overview</h2>
 <p>The Kasperia mobile app supports two mobile access paths:</p>
 <ol>
@@ -268,7 +284,7 @@ function openKasperiaWalletRequest(payload) {
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
   id: 'request-id',
   success: true,
-  data: ['0x1234...']
+  data: ['0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF']
 }</code></pre>
 <p>Decoded error response:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">{
@@ -319,7 +335,7 @@ const publicKey = await window.kasperia.getPublicKey();</code></pre>
   id: 'account-id',
   name: 'Account 1',
   kaspaAddress: 'kaspa:...',
-  evmAddress: '0x...',
+  evmAddress: '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF',
   publicKey: '...',
   isCurrent: true
 }</code></pre>
@@ -438,7 +454,7 @@ console.log(chainId); // example: '0x28c64' = 167012</code></pre>
 <p><code>wallet_addEthereumChain</code> is treated as a switch request to an already configured chain. The current app implementation does not add arbitrary new RPC networks from dApp params.</p>
 <h2 id="evm-balance">Get EVM Balance</h2>
 <p>Use <code>eth_getBalance</code> to read the native EVM balance. The result is a hex quantity.</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const address = '0x...';
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const address = '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF';
 const balanceHex = await window.kasperia.ethereum.request({
   method: 'eth_getBalance',
   params: [address, 'latest']
@@ -448,7 +464,7 @@ const balanceHex = await window.kasperia.ethereum.request({
   method: 'kasperia_getBalance',
   params: {
     type: 'evm',
-    address: '0x...'
+    address: '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF'
   }
 });</code></pre>
 <h2 id="evm-send">Send EVM Transaction</h2>
@@ -461,7 +477,7 @@ const balanceHex = await window.kasperia.ethereum.request({
     method: 'eth_sendTransaction',
     params: [{
       from,
-      to: '0x0000000000000000000000000000000000000000',
+      to: '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF',
       value: '0x0',
       data: '0x'
     }]
@@ -475,7 +491,7 @@ const balanceHex = await window.kasperia.ethereum.request({
   method: 'kasperia_sendTransaction',
   params: {
     type: 'evm',
-    to: '0x...',
+    to: '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF',
     amount: '0.01'
   }
 });</code></pre>
@@ -493,7 +509,7 @@ const signature = await provider.request({
   method: 'kasperia_signMessage',
   params: {
     message: 'Hello Kasperia',
-    address: '0x...'
+    address: '0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF'
   }
 });</code></pre>
 <h2 id="evm-readonly">Read-only RPC</h2>
@@ -523,102 +539,95 @@ provider.on('disconnect', (error) =&gt; {
   console.log('Disconnected:', error);
 });</code></pre>
 <h2 id="qr-overview">QR Scan Link Overview</h2>
-<p>Kasperia can scan a QR code, parse its text content, and open the matching app page with pre-filled parameters. QR scan links are intended to guide the user to the correct screen; they do not silently send funds. The user still reviews and confirms the action inside the app.</p>
-<div class="callout">A QR code should contain plain text: either a Kaspa address, a protocol URL such as <code>krc20://transfer?... </code>, a Kasperia app route such as <code>kasperia://bridge</code>, an EVM transfer URL, or a normal <code>https://</code> dApp URL.</div>
+<p>Kasperia scans the plain-text content inside a QR code, classifies it by protocol, and opens the matching app page with parsed parameters. Scanning only prepares the target page; it does not automatically submit a transfer, mint, bridge action, or transaction. The user must still review and confirm inside the app.</p>
+<div class="callout">The current Flutter scanner navigation supports these QR result types: Kasperia app pages, Kaspa transfer, KRC20 transfer / mint / token detail, EVM transfer, and normal web dApp URLs opened inside the app WebView.</div>
 <div class="protocol-grid">
-<div class="qr-protocol-card"><span class="qr-protocol-name">Raw Kaspa address</span><p>Open Send KAS and pre-fill the recipient, amount, and optional payload.</p></div>
-<div class="qr-protocol-card"><span class="qr-protocol-name">kasperia://</span><p>Open a Kasperia app page such as Bridge, KRC20 token list, or Ecosystem Fund.</p></div>
+<div class="qr-protocol-card"><span class="qr-protocol-name">Kaspa address / kaspa://</span><p>Open the Send KAS page with recipient, amount, and optional payload.</p></div>
+<div class="qr-protocol-card"><span class="qr-protocol-name">kasperia://</span><p>Open an internal Kasperia app page, including Bridge, KRC20 token list, or Ecosystem Fund.</p></div>
 <div class="qr-protocol-card"><span class="qr-protocol-name">krc20://</span><p>Open KRC20 transfer, mint, or token detail flows.</p></div>
-<div class="qr-protocol-card"><span class="qr-protocol-name">ethereum://</span><p>Open an EVM native-token or contract-token transfer page. <code>chainId</code> is required.</p></div>
-<div class="qr-protocol-card"><span class="qr-protocol-name">https://</span><p>Open a dApp URL inside the Kasperia WebView.</p></div>
+<div class="qr-protocol-card"><span class="qr-protocol-name">ethereum://</span><p>Open an EVM native-token or contract-token transfer page by chain id.</p></div>
+<div class="qr-protocol-card"><span class="qr-protocol-name">http:// / https://</span><p>Open a dApp URL inside the Kasperia in-app browser.</p></div>
 </div>
 <h2 id="qr-format">General QR Link Format</h2>
-<p>Use URL query parameters for optional values. Always URL-encode user-generated text, especially payloads, spaces, symbols, and non-English characters.</p>
+<p>Use a plain-text URL or address as the QR content. For routes with parameters, use standard query parameters: <code>?</code> after the route and <code>&amp;</code> between parameters. Always URL-encode user-generated text, especially payloads, token symbols, addresses inside query values, spaces, symbols, and non-English characters.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Parameter</th><th>Used by</th><th>Description</th><th>Example</th></tr></thead>
 <tbody>
-<tr><td><code>to</code> / <code>address</code></td><td>KAS, Bridge, KRC20, EVM</td><td>Recipient address. For Kaspa and KRC20, the address prefix must match the current Kaspa network.</td><td><code>to=kaspatest:...</code></td></tr>
-<tr><td><code>amount</code></td><td>KAS, Bridge, KRC20, EVM</td><td>Optional amount used to pre-fill the target page. Use a human-readable decimal value unless your own UI clearly tells users otherwise.</td><td><code>amount=5</code></td></tr>
-<tr><td><code>payload</code></td><td>KAS</td><td>Optional Kaspa transaction payload. Encode it with <code>encodeURIComponent</code>.</td><td><code>payload=hello</code></td></tr>
-<tr><td><code>tick</code></td><td>KRC20</td><td>KRC20 ticker symbol. Required for KRC20 transfer and mint.</td><td><code>tick=JEMES</code></td></tr>
+<tr><td><code>to</code></td><td>KAS, KRC20, EVM, Bridge</td><td>Recipient address. Kaspa / KRC20 addresses are checked against the current Kaspa network.</td><td><code>to=kaspatest:...</code></td></tr>
+<tr><td><code>address</code></td><td>Bridge, Ecosystem Fund</td><td>Alternative recipient field accepted by internal app pages.</td><td><code>address=kaspatest:...</code></td></tr>
+<tr><td><code>amount</code></td><td>KAS, KRC20, EVM, Bridge, Ecosystem Fund</td><td>Optional amount used to pre-fill the target page. Use a human-readable decimal value in QR links.</td><td><code>amount=5</code></td></tr>
+<tr><td><code>payload</code></td><td>KAS</td><td>Optional Kaspa transaction payload passed to the Send KAS page.</td><td><code>payload=hello</code></td></tr>
+<tr><td><code>tick</code></td><td>KRC20</td><td>KRC20 ticker symbol. Required for transfer, mint, and token detail routes.</td><td><code>tick=JEMES</code></td></tr>
 <tr><td><code>chainId</code></td><td>EVM</td><td>Required EVM chain id. The app must already have a matching network config.</td><td><code>chainId=56</code></td></tr>
-<tr><td><code>token</code></td><td>EVM</td><td>Optional ERC20 contract address. If omitted, the app opens the native-token transfer flow.</td><td><code>token=0x...</code></td></tr>
+<tr><td><code>token</code></td><td>EVM</td><td>Optional ERC20 contract address. If omitted, the app opens the native-token transfer flow.</td><td><code>token=0x1234567890abcdef1234567890abcdef12345678</code></td></tr>
 <tr><td><code>targetAmount</code></td><td>Ecosystem Fund</td><td>Optional target amount for the Ecosystem Fund page.</td><td><code>targetAmount=100</code></td></tr>
 </tbody>
 </table>
 </div>
-<div class="callout warning">For QR content, prefer standard query syntax with <code>?</code> after the route and <code>&amp;</code> between parameters. Raw Kaspa address links may also use the compact form shown below, but query-style links are easier for developers to generate and debug.</div>
+<div class="callout warning">The scanner should receive the final plain-text content exactly as shown in the examples. Do not put private keys, seed phrases, passwords, or long sensitive data into a QR code.</div>
 <h2 id="qr-kaspa">KAS Transfer QR</h2>
-<p>A Kaspa QR can contain only a recipient address, or it can include <code>amount</code> and <code>payload</code>. Scanning the QR opens the Send KAS page with the parsed values pre-filled.</p>
+<p>Kaspa transfer QR content opens the Send KAS page. The scanner supports a raw Kaspa address and a transfer-style URL. If <code>amount</code> or <code>payload</code> is included, the app pre-fills those values. The app checks that the scanned recipient address prefix matches the current Kaspa network before opening the send page.</p>
 <div class="qr-example-list">
 <div class="qr-example-row">
 <div class="qr-example-left">
 <span class="qr-label">Address only</span>
-<code class="qr-copy-value">kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey</code>
+<code class="qr-copy-value">kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl</code>
 </div>
-<div class="qr-example-right">Open the Send KAS page with only the recipient address filled.</div>
-</div>
-<div class="qr-example-row">
-<div class="qr-example-left">
-<span class="qr-label">Address + amount</span>
-<code class="qr-copy-value">kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5</code>
-</div>
-<div class="qr-example-right">Open the Send KAS page with recipient and amount pre-filled.</div>
+<div class="qr-example-right">Open Send KAS with only the recipient address filled.</div>
 </div>
 <div class="qr-example-row">
 <div class="qr-example-left">
-<span class="qr-label">Address + amount + payload</span>
-<code class="qr-copy-value">kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5&amp;payload=haha</code>
+<span class="qr-label">Transfer URL</span>
+<code class="qr-copy-value">kaspa://transfer?to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5</code>
 </div>
-<div class="qr-example-right">Open the Send KAS page with recipient, amount, and payload pre-filled. Keep QR examples as plain text; encode special characters only when your payload contains spaces or symbols.</div>
+<div class="qr-example-right">Open Send KAS with recipient and amount pre-filled.</div>
+</div>
+<div class="qr-example-row">
+<div class="qr-example-left">
+<span class="qr-label">Transfer URL with payload</span>
+<code class="qr-copy-value">kaspa://transfer?to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5&amp;payload=hello</code>
+</div>
+<div class="qr-example-right">Open Send KAS with recipient, amount, and payload pre-filled.</div>
 </div>
 </div>
-<p>Alternative query-style format:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kaspa://transfer?to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5&amp;payload=haha</code></pre>
-<p>Generate a KAS transfer QR string:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildKasTransferQr({ to, amount, payload }) {
   const params = new URLSearchParams();
   params.set('to', to);
   if (amount !== undefined &amp;&amp; amount !== '') params.set('amount', String(amount));
   if (payload) params.set('payload', payload);
   return `kaspa://transfer?${params.toString()}`;
-}
-
-const qrText = buildKasTransferQr({
-  to: 'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey',
-  amount: 5,
-  payload: 'haha'
-});</code></pre>
-<h2 id="qr-app-pages">Kasperia App Pages</h2>
-<p>Use the <code>kasperia://</code> scheme to open supported Kasperia app pages. This is useful for QR codes printed on websites, campaigns, bridge pages, or offline materials.</p>
+}</code></pre>
+<h2 id="qr-app-pages">Kasperia App Pages / Bridge QR</h2>
+<p>Use the <code>kasperia://</code> scheme for supported internal app pages. These links are handled by the app page scanner flow.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>QR content</th><th>Supported parameters</th><th>Result in app</th></tr></thead>
 <tbody>
-<tr><td><code>kasperia://bridge</code></td><td><code>to</code>, <code>address</code>, <code>amount</code></td><td>Open the Bridge page. If recipient or amount is provided, the page receives them as initial values.</td></tr>
+<tr><td><code>kasperia://bridge</code></td><td><code>to</code> / <code>address</code>, <code>amount</code></td><td>Open the Bridge page. Recipient and amount are passed as initial values when present.</td></tr>
 <tr><td><code>kasperia://bridge?to=kaspatest:...&amp;amount=5</code></td><td><code>to</code>, <code>amount</code></td><td>Open Bridge with recipient and amount pre-filled.</td></tr>
 <tr><td><code>kasperia://krc20_tokens</code></td><td>None</td><td>Open the KRC20 token list page.</td></tr>
-<tr><td><code>kasperia://eco_system_fund?to=kaspatest:...&amp;amount=5&amp;targetAmount=100</code></td><td><code>to</code> / <code>address</code>, <code>amount</code>, <code>targetAmount</code></td><td>Open the Ecosystem Fund page with receive address and amounts.</td></tr>
+<tr><td><code>kasperia://eco_system_fund?address=kaspatest:...&amp;amount=5&amp;targetAmount=100</code></td><td><code>address</code> / <code>to</code>, <code>amount</code>, <code>targetAmount</code></td><td>Open the Ecosystem Fund page with receive address, transfer amount, and target amount.</td></tr>
 </tbody>
 </table>
 </div>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kasperia://bridge?to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5</code></pre>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kasperia://bridge?to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
+kasperia://krc20_tokens
+kasperia://eco_system_fund?address=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5&amp;targetAmount=100</code></pre>
 <h2 id="qr-krc20">KRC20 Transfer / Mint QR</h2>
-<p>Use the <code>krc20://</code> scheme for KRC20 token actions. The app checks the current Kaspa network, looks up the current account token data, and opens the matching KRC20 page.</p>
+<p>Use the <code>krc20://</code> scheme for KRC20 actions. The app reads <code>tick</code> as the token identifier, checks the current account token data when needed, and opens the matching KRC20 page. For transfer and mint, if a recipient is provided, the Kaspa address prefix must match the current Kaspa network.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Action</th><th>QR content</th><th>Required parameters</th><th>Result in app</th></tr></thead>
 <tbody>
-<tr><td>Transfer</td><td><code>krc20://transfer?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>, optional <code>to</code>, optional <code>amount</code></td><td>Open KRC20 Send page for the ticker.</td></tr>
-<tr><td>Mint</td><td><code>krc20://mint?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>, optional <code>to</code>, optional <code>amount</code></td><td>Open KRC20 Mint page. If <code>to</code> is missing, the current account Kaspa address is used.</td></tr>
-<tr><td>Token detail</td><td><code>krc20://token?tick=JEMES</code></td><td><code>tick</code></td><td>Open the KRC20 token detail page if the current account has token data.</td></tr>
+<tr><td>Transfer</td><td><code>krc20://transfer?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>; optional <code>to</code>, <code>amount</code></td><td>Open the KRC20 Send page for the ticker.</td></tr>
+<tr><td>Mint</td><td><code>krc20://mint?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>; optional <code>to</code>, <code>amount</code></td><td>Open the KRC20 Mint page. If <code>to</code> is missing, the current account Kaspa address is used.</td></tr>
+<tr><td>Token detail</td><td><code>krc20://token?tick=JEMES</code></td><td><code>tick</code></td><td>Open the KRC20 token detail page if the token exists for the current account.</td></tr>
 </tbody>
 </table>
 </div>
-<p>Examples:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">krc20://transfer?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5
-krc20://mint?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-text">krc20://transfer?tick=JEMES&amp;to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
+krc20://mint?tick=JEMES&amp;to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
 krc20://token?tick=JEMES</code></pre>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildKrc20TransferQr({ tick, to, amount }) {
   const params = new URLSearchParams();
@@ -628,73 +637,80 @@ krc20://token?tick=JEMES</code></pre>
   return `krc20://transfer?${params.toString()}`;
 }</code></pre>
 <h2 id="qr-evm">EVM Transfer QR</h2>
-<p>Use the <code>ethereum://transfer</code> scheme to open the EVM Send page. <code>chainId</code> is required. If <code>token</code> is omitted, Kasperia opens the native-token transfer flow for that chain. If <code>token</code> is provided, Kasperia treats it as a contract token address and opens the token transfer flow.</p>
+<p>Use the <code>ethereum://transfer</code> scheme to open the EVM Send page. <code>chainId</code> is required. The app looks up the network by chain id; if no configured network is found, the scanner shows an error. If <code>token</code> is omitted, the app opens the native-token transfer flow. If <code>token</code> is provided, the app treats it as a contract token address and opens the token transfer flow.</p>
 <div class="qr-example-list">
 <div class="qr-example-row">
 <div class="qr-example-left">
 <span class="qr-label">Native token transfer</span>
-<code class="qr-copy-value">ethereum://transfer?chainId=56&amp;to=0xEe461548B7CA5b4A1C9E4c078054BD047b8786c1&amp;amount=1.5</code>
+<code class="qr-copy-value">ethereum://transfer?chainId=56&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=1.5</code>
 </div>
 <div class="qr-example-right">Open the EVM native-token Send page on chain id 56.</div>
 </div>
 <div class="qr-example-row">
 <div class="qr-example-left">
 <span class="qr-label">Contract token transfer</span>
-<code class="qr-copy-value">ethereum://transfer?chainId=56&amp;token=0x1234567890abcdef1234567890abcdef12345678&amp;to=0xEe461548B7CA5b4A1C9E4c078054BD047b8786c1&amp;amount=100</code>
+<code class="qr-copy-value">ethereum://transfer?chainId=56&amp;token=0x1234567890abcdef1234567890abcdef12345678&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=100</code>
 </div>
 <div class="qr-example-right">Open the EVM contract-token Send page for the given token contract.</div>
 </div>
 </div>
-<div class="callout warning">The app must have a network configuration matching the scanned <code>chainId</code>. If the chain id is missing or not configured, the app will show an error instead of opening the send page.</div>
+<div class="callout warning">The scanned <code>chainId</code> must be a positive number and must exist in the app EVM network configuration.</div>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildEvmTransferQr({ chainId, to, amount, token }) {
   const params = new URLSearchParams();
   params.set('chainId', String(chainId));
-  params.set('to', to);
+  if (to) params.set('to', to);
   if (amount !== undefined &amp;&amp; amount !== '') params.set('amount', String(amount));
   if (token) params.set('token', token);
   return `ethereum://transfer?${params.toString()}`;
 }</code></pre>
 <h2 id="qr-dapp">Open dApp URL QR</h2>
-<p>If the scanned QR content is a normal web URL, Kasperia opens it inside the app WebView. The dApp can then use <code>window.kasperia</code> and <code>window.kasperia.ethereum</code> after provider injection.</p>
+<p>If the scanned QR content is a normal <code>http://</code> or <code>https://</code> web URL, Kasperia opens it inside the app WebView. The dApp can then use <code>window.kasperia</code> and <code>window.kasperia.ethereum</code> after provider injection.</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">https://kas.fun/
+http://example.com/dapp
 https://kasbridge-tn10evm-m.kaspafoundation.org/</code></pre>
+<div class="callout warning">For production dApps, prefer <code>https://</code>. Use <code>http://</code> only for local development, testing, or trusted internal environments.</div>
 <p>Recommended dApp behavior after being opened from a QR:</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">async function initAfterQrOpen() {
-  const wallet = await ensureKasperiaReady();
+  const wallet = await waitForKasperia();
   const accounts = await wallet.requestAccounts();
   const network = await wallet.getNetwork();
   return { accounts, network };
 }</code></pre>
 <h2 id="qr-builder">QR Builder Examples</h2>
-<p>Developers can generate QR codes with any QR library as long as the encoded content is the exact plain-text link.</p>
+<p>Developers can generate QR codes with any QR library as long as the encoded content is the exact plain-text link that the scanner should receive.</p>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">import QRCode from 'qrcode';
 
-const qrText = 'krc20://transfer?tick=JEMES&amp;to=kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey&amp;amount=5';
+const qrText = 'krc20://transfer?tick=JEMES&amp;to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5';
 const dataUrl = await QRCode.toDataURL(qrText);
 
 document.querySelector('#qr').src = dataUrl;</code></pre>
-<p>Plain JavaScript helper for building links safely:</p>
-<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const KAS_TEST_ADDRESS = 'kaspatest:qr24daqennp22ang7flqyzn47wrhn90vgvgnem92tk78ga3teewcgyngg85ey';
+<p>Plain JavaScript helper for building supported scan links safely:</p>
+<pre><button class="copy-btn" type="button">Copy</button><code class="language-js">const KAS_TEST_ADDRESS = 'kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl';
 
 const examples = {
-  kasWithoutAmount: KAS_TEST_ADDRESS,
-  kasWithAmount: `${KAS_TEST_ADDRESS}&amp;amount=5`,
-  kasWithPayload: `${KAS_TEST_ADDRESS}&amp;amount=5&amp;payload=${encodeURIComponent('haha afasdfsdafasdf')}`,
+  kasAddressOnly: KAS_TEST_ADDRESS,
+  kasTransfer: `kaspa://transfer?to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5&amp;payload=${encodeURIComponent('hello world')}`,
   bridge: `kasperia://bridge?to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
+  krc20TokenList: 'kasperia://krc20_tokens',
+  ecosystemFund: `kasperia://eco_system_fund?address=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5&amp;targetAmount=100`,
   krc20Transfer: `krc20://transfer?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
   krc20Mint: `krc20://mint?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
-  evmTransfer: 'ethereum://transfer?chainId=56&amp;to=0xEe461548B7CA5b4A1C9E4c078054BD047b8786c1&amp;amount=1.5',
-  dapp: 'https://kas.fun/'
+  krc20Token: 'krc20://token?tick=JEMES',
+  evmNativeTransfer: 'ethereum://transfer?chainId=56&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=1.5',
+  evmTokenTransfer: 'ethereum://transfer?chainId=56&amp;token=0x1234567890abcdef1234567890abcdef12345678&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=100',
+  dappHttps: 'https://kas.fun/',
+  dappHttp: 'http://example.com/dapp'
 };</code></pre>
 <h2 id="qr-notes">Validation Notes</h2>
 <ol>
-<li>Scanning a payment QR opens a pre-filled app page; the user must still confirm the transfer or mint operation.</li>
-<li>For Kaspa and KRC20 links, the recipient address prefix must match the current Kaspa network. A <code>kaspatest:</code> address should be used on testnet, and a <code>kaspa:</code> address should be used on mainnet.</li>
+<li>Scanning a payment, mint, bridge, or EVM QR opens a pre-filled app page; the user must still confirm the action.</li>
+<li>For Kaspa and KRC20 links, the recipient address prefix must match the current Kaspa network. Use <code>kaspa:</code> on mainnet and <code>kaspatest:</code> on testnet.</li>
 <li>For KRC20 actions, <code>tick</code> is required. If the token cannot be found for the current account, the app shows an error.</li>
-<li>For EVM transfer links, <code>chainId</code> is required and must exist in the app network config.</li>
-<li>Use <code>encodeURIComponent</code> or <code>URLSearchParams</code> for payloads and addresses when generating QR links from JavaScript.</li>
-<li>Avoid putting private keys, seed phrases, passwords, or long sensitive data inside QR codes.</li>
-<li>Unsupported or unknown protocols should be treated as invalid QR content by the dApp or campaign page.</li>
+<li>For EVM transfer links, <code>chainId</code> is required, must be greater than zero, and must exist in the app EVM network config.</li>
+<li>For EVM contract-token transfers, <code>token</code> must be a valid contract address on the selected chain.</li>
+<li>For dApp QR links, <code>http://</code> and <code>https://</code> URLs are opened inside the app WebView.</li>
+<li>Use <code>encodeURIComponent</code> or <code>URLSearchParams</code> when generating QR links from JavaScript.</li>
+<li>Unsupported or unknown protocols should be treated as invalid QR content.</li>
 </ol>
 <h2 id="network-reference">Network Reference</h2>
 <p>Use <code>window.kasperia.getNetworks()</code> to get the exact networks configured in the current app build. A network item may include the following fields:</p>
@@ -774,7 +790,7 @@ const examples = {
 </div>
 </div>
 </footer>
-<script src="./js/main.js?v=1.0.2"></script>
+<script src="./js/main.js?v=1.0.7"></script>
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasperia QR Links Test</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <div class="brand">KASPERIA QR Links</div>
+      <nav class="nav">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html#demo">API Docs</a>
+        <a href="app-in.html">In-App API</a>
+        <a href="app-out.html">External App</a>
+        <a class="active" href="qr-links.html">QR Links</a>
+      </nav>
+    </div>
+    <section class="hero">
+      <div class="card">
+        <span class="badge">QR scan protocols</span>
+        <h1>QR Scan Link Test</h1>
+        <p>Each QR code stores plain-text content. After scanning, the app classifies the protocol, opens the matching page, and pre-fills supported parameters.</p>
+      </div>
+      <div class="card">
+        <h2>Protocol Summary</h2>
+        <table class="table">
+          <tr><th>Type</th><th>Example</th></tr>
+          <tr><td>Bridge</td><td><code>kasperia://bridge</code></td></tr>
+          <tr><td>KAS</td><td><code>kaspatest:address&amp;amount=5</code></td></tr>
+          <tr><td>EVM</td><td><code>ethereum://transfer?chainId=0x61&amp;to=0x...&amp;amount=0.001</code></td></tr>
+          <tr><td>KRC20</td><td><code>krc20://transfer?tick=JEMES&amp;to=...&amp;amount=5</code></td></tr>
+          <tr><td>dApp URL</td><td><code>https://kas.fun/</code></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <h2 class="section-title">QR Examples</h2>
+    <section class="grid" id="qrList"></section>
+  </main>
+  <script src="./js/common.js"></script>
+  <script>
+    const examples = [
+      {
+        title: 'Open Bridge Page',
+        desc: 'Open the Kasperia Bridge page after scanning.',
+        text: 'kasperia://bridge',
+        effect: 'Open Bridge page'
+      },
+      {
+        title: 'Bridge With Params',
+        desc: 'If the app version supports Bridge parameters, this opens Bridge and pre-fills the target address and amount.',
+        text: 'kasperia://bridge?to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amount=5&chainid=167012',
+        effect: 'Open Bridge page with params'
+      },
+      {
+        title: 'KAS Transfer - Address Only',
+        desc: 'Open the Send KAS page with only the recipient address filled.',
+        text: 'kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl',
+        effect: 'Open Send KAS page'
+      },
+      {
+        title: 'KAS Transfer - With Amount',
+        desc: 'Open the Send KAS page with the recipient address and amount filled.',
+        text: 'kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amount=5',
+        effect: 'Open Send KAS page with amount'
+      },
+      {
+        title: 'KAS Transfer - With Payload',
+        desc: 'Open the Send KAS page with recipient, amount, and a plain-text payload.',
+        text: 'kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amount=5&payload=hello',
+        effect: 'Open Send KAS page with payload'
+      },
+      {
+        title: 'EVM Transfer',
+        desc: 'Open the EVM send page after scanning. chainId identifies the EVM network.',
+        text: 'ethereum://transfer?chainId=0x61&to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amount=0.001',
+        effect: 'Open EVM send page'
+      },
+      {
+        title: 'KRC20 Transfer',
+        desc: 'Open the KRC20 transfer page after scanning.',
+        text: 'krc20://transfer?tick=JEMES&to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amount=5',
+        effect: 'Open KRC20 transfer page'
+      },
+      {
+        title: 'KRC20 Mint',
+        desc: 'Open the KRC20 mint page after scanning.',
+        text: 'krc20://mint?tick=JEMES&to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amount=5',
+        effect: 'Open KRC20 mint page'
+      },
+      {
+        title: 'Open dApp URL',
+        desc: 'Open a normal web page or dApp after scanning.',
+        text: 'https://kas.fun/',
+        effect: 'Open web page / dApp'
+      }
+    ];
+
+    function renderQrCards() {
+      const root = $('qrList');
+      root.innerHTML = examples.map((item, index) => `
+        <div class="card">
+          <h2>${item.title}</h2>
+          <p>${item.desc}</p>
+          <div class="qr-grid">
+            <div>
+              <div class="code-line">${escapeHtml(item.text)}<button class="copy" data-copy="${escapeAttr(item.text)}">Copy</button></div>
+              <p class="small" style="margin-top:10px"><b>Scan Result:</b> ${item.effect}</p>
+            </div>
+            <img class="qr-img" src="${qrUrl(item.text)}" alt="QR ${index + 1}">
+          </div>
+        </div>
+      `).join('');
+    }
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])); }
+    function escapeAttr(str) { return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    renderQrCards();
+  </script>
+</body>
+</html>

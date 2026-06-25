@@ -169,9 +169,8 @@ footer{padding:28px 0 20px;color:var(--muted);border-top:1px solid var(--stroke)
 .docs article.article td{color:var(--muted);}
 .docs article.article tr:last-child td{width: 30px; border-bottom:0;}
 .docs article.article p code,.docs article.article li code,.docs article.article td code{background:#eff6f7;border:1px solid #dbe9ec;border-radius:6px;padding:.1rem .28rem;color:#12363d;word-break:break-word;}
-.docs article.article pre{position:relative;padding:14px 14px 14px 14px;overflow:auto;white-space:pre;border-radius:12px;}
+.docs article.article pre{position:relative;padding:14px 14px 14px 14px;white-space:pre;border-radius:12px;}
 .docs article.article pre code{white-space:pre;font-size:.9rem;}
-.docs article.article pre .copy-btn{position:sticky;top:0;right:0;float:right;margin-left:10px;z-index:2;}
 .docs article.article .qr-protocol-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0 20px;}
 .docs article.article .qr-protocol-card{margin-bottom: 10px; border:1px solid var(--stroke);border-radius:14px;background:#fff;padding:12px;min-height:112px;display:flex;flex-direction:column;gap:6px;}
 .docs article.article .qr-protocol-card strong{color:var(--ink);font-size:.95rem;}
@@ -230,7 +229,6 @@ footer{padding:28px 0 20px;color:var(--muted);border-top:1px solid var(--stroke)
 .docs article.article pre{
   position:relative;
   padding:42px 14px 14px;
-  overflow:auto;
   white-space:pre;
   max-width:100%;
 }
@@ -335,7 +333,6 @@ footer{padding:28px 0 20px;color:var(--muted);border-top:1px solid var(--stroke)
 }
 .docs article.article pre{
   position:relative;
-  overflow:hidden;
   padding:42px 0 0 0;
   background:#0b1e22;
 }
@@ -354,7 +351,7 @@ footer{padding:28px 0 20px;color:var(--muted);border-top:1px solid var(--stroke)
 }
 .docs article.article pre .copy-btn{
   position:absolute;
-  top:8px;
+  left:90%;
   right:8px;
   z-index:10;
   float:none;
@@ -415,3 +412,24 @@ footer{padding:28px 0 20px;color:var(--muted);border-top:1px solid var(--stroke)
 .docs article.article pre code.language-js .hl-num{color:#f7a9a9 !important;}
 .docs article.article pre code.language-js .hl-cmt{color:#7aa1a8 !important;font-style:italic !important;}
 .docs article.article pre code.language-js .hl-op{color:#9bd9e8 !important;}
+
+
+/* v1.0.7 demo entry in docs */
+.docs article.article .demo-entry-cards .card{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.docs article.article .demo-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:8px 12px;
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  color:#06333a;
+  font-weight:850;
+  text-decoration:none;
+}
+.docs article.article .demo-link:hover{filter:brightness(.98);}

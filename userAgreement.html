@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon" />
@@ -13,6 +12,7 @@
             --muted: #4b5563;
             --bg: #ffffff;
             --border: #e5e7eb;
+            --link: #0f766e;
         }
 
         * {
@@ -25,7 +25,8 @@
             padding: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: 16px;
             line-height: 1.65;
             -webkit-text-size-adjust: 100%;
@@ -33,7 +34,8 @@
         }
 
         body {
-            padding: max(20px, env(safe-area-inset-top)) 18px max(32px, env(safe-area-inset-bottom));
+            padding: max(20px, env(safe-area-inset-top)) 18px
+                max(32px, env(safe-area-inset-bottom));
         }
 
         main {
@@ -47,7 +49,6 @@
             line-height: 1.25;
             margin: 8px 0 6px;
             font-weight: 700;
-            letter-spacing: -0.02em;
         }
 
         .updated {
@@ -82,10 +83,11 @@
             font-weight: 700;
         }
 
-        a {
-            color: #0f766e;
-            text-decoration: none;
-            overflow-wrap: anywhere;
+        .notice {
+            margin: 18px 0;
+            padding: 14px 16px;
+            border-left: 3px solid var(--link);
+            background: #f0fdfa;
         }
 
         .footer {
@@ -101,169 +103,244 @@
 <body>
     <main>
         <h1>Kasperia User Agreement</h1>
-        <p class="updated">Last Updated: June 8, 2026</p>
+
+        <p class="updated">
+            Last updated: August 13, 2026
+        </p>
 
         <p>
-            This User Agreement explains the terms and conditions that apply when you access or use Kasperia.
-            By using Kasperia, you agree to this Agreement. If you do not agree, please do not use the App.
+            This User Agreement governs your use of the Kasperia mobile
+            application and related wallet features. By downloading, accessing,
+            or using Kasperia, or by creating or importing a wallet, you agree
+            to this Agreement. If you do not agree, do not use the app.
         </p>
+
+        <div class="notice">
+            <strong>Important:</strong>
+            Kasperia is a self-custodial wallet. You control your wallet
+            credentials and are solely responsible for your recovery phrase,
+            private keys, transaction decisions, and assets.
+        </div>
 
         <h2>1. About Kasperia</h2>
+
         <p>
-            Kasperia is a non-custodial wallet application designed for Kaspa-based transfers, payments, asset
-            management,
-            and related blockchain interactions.
-        </p>
-        <p>
-            Kasperia helps users create, import, manage, and use blockchain wallets locally on their own devices.
-            Kasperia does not custody, control, or manage your assets on your behalf.
+            Kasperia is a self-custodial wallet focused on the Kaspa ecosystem.
+            It provides tools to create or import wallets, manage supported KAS,
+            KRC20, KNS, and supported Kaslex network assets, view public
+            blockchain information, send and receive supported assets, scan QR
+            codes, and connect to selected Web3 services.
         </p>
 
-        <h2>2. Non-Custodial Wallet</h2>
         <p>
-            Kasperia is a non-custodial wallet. This means you are solely responsible for your wallet, private keys,
-            recovery phrases, passwords, and any assets associated with your wallet addresses.
-        </p>
-        <p>
-            Kasperia cannot recover your wallet, reset your password, restore your recovery phrase, reverse
-            transactions,
-            or access your funds if your private keys or recovery phrase are lost, stolen, or disclosed.
+            Kasperia is a wallet software application and interface. It is not
+            a bank, broker, investment adviser, centralized exchange,
+            decentralized exchange, payment institution, or custodial service.
         </p>
 
-        <h2>3. User Responsibilities</h2>
+        <h2>2. Self-Custody and Wallet Credentials</h2>
+
+        <p>
+            Wallets are created or imported locally on your device. Kasperia
+            does not hold your assets, control your private keys, or maintain a
+            recovery copy of your recovery phrase.
+        </p>
+
+        <p>
+            Kasperia cannot recover a lost recovery phrase, reset a wallet
+            password, freeze or restore a wallet, reverse a transaction, or
+            retrieve assets sent to an incorrect address. Anyone who obtains
+            your recovery phrase or private keys may be able to control the
+            associated assets.
+        </p>
+
+        <h2>3. Supported Assets and Networks</h2>
+
+        <p>
+            Kasperia may support KAS, KRC20 tokens, KNS names or assets, and
+            assets on supported Kaslex networks. Support may depend on the
+            selected network, token contract, node, indexer, or third-party
+            service.
+        </p>
+
+        <p>
+            Displaying an asset, token, name, balance, or transaction does not
+            mean that Kasperia issued, endorsed, verified, sold, or guarantees
+            that asset. You are responsible for checking the asset identifier,
+            network, contract information, and recipient before taking action.
+        </p>
+
+        <h2>4. Transfers and Blockchain Transactions</h2>
+
+        <p>
+            When you submit a transaction, Kasperia uses your locally
+            controlled wallet credentials to sign or authorize the requested
+            operation. The transaction is then submitted to the relevant
+            blockchain network or service.
+        </p>
+
+        <p>
+            Blockchain transactions may be irreversible. You are responsible
+            for verifying the destination address, network, asset, amount,
+            payload, fees, and any other transaction details before
+            confirmation.
+        </p>
+
+        <p>
+            Kasperia does not guarantee confirmation time, network
+            availability, fee levels, transaction execution, balance accuracy,
+            or the continued availability of any blockchain node, indexer,
+            explorer, or related service.
+        </p>
+
+        <h2>5. Network Fees</h2>
+
+        <p>
+            Transactions may require network fees or other charges determined
+            by the relevant blockchain or third-party service. Fees may change
+            with network conditions. Unless expressly stated in the app, network
+            fees are not fees charged by Kasperia.
+        </p>
+
+        <h2>6. Bridge and Cross-Network Features</h2>
+
+        <p>
+            Kasperia may provide an interface or link to supported bridge-related
+            services. A bridge transaction may involve smart contracts,
+            validators, relayers, liquidity providers, or other third parties.
+        </p>
+
+        <p>
+            Kasperia does not operate the bridge protocol, custody assets during
+            a bridge transaction, guarantee delivery, determine exchange rates,
+            provide liquidity, or settle trades. Review the applicable
+            third-party terms and transaction details before confirming a bridge
+            operation.
+        </p>
+
+        <h2>7. DApps and Third-Party Services</h2>
+
+        <p>
+            Kasperia may provide access to third-party decentralized
+            applications, websites, explorers, protocols, exchanges, bridge
+            services, news, or community resources. These services are
+            independent from Kasperia and may have separate terms, privacy
+            policies, fees, and risks.
+        </p>
+
+        <p>
+            When connecting to a DApp, the DApp may see your public wallet
+            address and may request message signatures, permissions, network
+            changes, token approvals, or transactions. Read each request
+            carefully.
+        </p>
+
+        <p>
+            Kasperia does not control the code, content, security, or conduct
+            of third-party services and does not guarantee their accuracy,
+            availability, legality, or safety.
+        </p>
+
+        <h2>8. User Responsibilities</h2>
+
         <p>You agree to:</p>
+
         <ul>
-            <li>Keep your private keys, recovery phrase, passwords, and device secure.</li>
-            <li>Verify all transaction details before confirming any transfer or payment.</li>
-            <li>Use only wallet addresses and networks that you have carefully checked.</li>
-            <li>Understand that blockchain transactions may be irreversible once submitted.</li>
-            <li>Use Kasperia only in compliance with applicable laws and regulations.</li>
+            <li>Secure your device, wallet password, private keys, and recovery phrase;</li>
+            <li>Keep a reliable backup of your recovery phrase in a secure offline location;</li>
+            <li>Check addresses, networks, assets, amounts, fees, and transaction requests before approval;</li>
+            <li>Use Kasperia only for lawful purposes and in compliance with applicable laws;</li>
+            <li>Review the terms and privacy policies of third-party services before using them; and</li>
+            <li>Accept responsibility for activity performed using your wallet credentials or device.</li>
         </ul>
 
-        <h2>4. Blockchain Transactions</h2>
+        <h2>9. Prohibited Use</h2>
+
         <p>
-            Transactions made through Kasperia are broadcast to public blockchain networks. Once a transaction is
-            submitted,
-            it may not be possible to cancel, modify, or reverse it.
-        </p>
-        <p>
-            Kasperia does not guarantee transaction confirmation time, network availability, fee levels, final
-            execution,
-            or the accuracy of information provided by third-party blockchain networks, nodes, explorers, or services.
+            You must not use Kasperia to facilitate fraud, theft, money
+            laundering, terrorist financing, sanctions evasion, market
+            manipulation, unauthorized access, malware distribution, or any
+            other unlawful activity. You must not interfere with the app, its
+            infrastructure, or the operation of supported networks.
         </p>
 
-        <h2>5. Fees</h2>
+        <h2>10. Digital Asset Risks</h2>
+
         <p>
-            Blockchain transactions may require network fees. These fees are charged by the relevant blockchain network,
-            not by Kasperia, unless clearly stated otherwise.
-        </p>
-        <p>
-            Network fees may change depending on network conditions. You are responsible for reviewing and confirming
-            applicable fees before submitting transactions.
+            Digital assets and blockchain systems involve substantial risks,
+            including price volatility, loss of value, smart-contract
+            vulnerabilities, malicious tokens, phishing, malware, key theft,
+            network congestion, forks, outages, incorrect data, regulatory
+            changes, and permanent loss caused by user error.
         </p>
 
-        <h2>6. Third-Party Services and DApps</h2>
         <p>
-            Kasperia may allow you to connect to third-party decentralized applications, websites, protocols, bridges,
-            exchanges, or other services.
-        </p>
-        <p>
-            Third-party services are not controlled by Kasperia. You are responsible for reviewing and understanding
-            any third-party service before connecting your wallet, signing messages, approving transactions, or
-            transferring assets.
-        </p>
-        <p>
-            Kasperia is not responsible for losses, errors, security issues, smart contract risks, misleading
-            information,
-            or any other issues caused by third-party services.
+            Kasperia does not provide investment, financial, legal, tax,
+            trading, or other professional advice. You should obtain
+            independent advice where appropriate and use only assets and
+            services you understand.
         </p>
 
-        <h2>7. Prohibited Use</h2>
-        <p>You agree not to use Kasperia for:</p>
-        <ul>
-            <li>Illegal, fraudulent, deceptive, or harmful activities.</li>
-            <li>Money laundering, terrorist financing, sanctions evasion, or other prohibited transactions.</li>
-            <li>Attacking, disrupting, reverse engineering, or interfering with Kasperia or related services.</li>
-            <li>Violating the rights, security, or privacy of other users or third parties.</li>
-        </ul>
+        <h2>11. Availability and Changes</h2>
 
-        <h2>8. Security Risks</h2>
         <p>
-            Digital assets and blockchain technologies involve significant risks, including price volatility, software
-            bugs,
-            smart contract vulnerabilities, network failures, phishing attacks, malware, and user error.
-        </p>
-        <p>
-            You are responsible for understanding these risks before using Kasperia. You should only use Kasperia if you
-            understand how non-custodial wallets and blockchain transactions work.
+            Kasperia may be updated, modified, suspended, or discontinued.
+            Features may be unavailable or delayed because of maintenance,
+            software issues, network conditions, security events, regulatory
+            requirements, or third-party service changes.
         </p>
 
-        <h2>9. No Financial Advice</h2>
         <p>
-            Kasperia does not provide investment, financial, legal, tax, or trading advice. Any information displayed in
-            the App
-            is for general functional purposes only and should not be treated as professional advice.
-        </p>
-        <p>
-            You are solely responsible for your own decisions regarding digital assets, transfers, payments, and
-            blockchain interactions.
+            Supported assets, networks, links, and services may change without
+            notice. Older versions may not continue to work with current
+            networks or services.
         </p>
 
-        <h2>10. Availability and Updates</h2>
+        <h2>12. Disclaimer of Warranties</h2>
+
         <p>
-            Kasperia may be updated, modified, suspended, or discontinued at any time. We may release updates to improve
-            security,
-            functionality, compatibility, or user experience.
-        </p>
-        <p>
-            Some features may depend on third-party services or blockchain networks and may be unavailable, delayed, or
-            inaccurate
-            due to factors outside our control.
+            Kasperia is provided on an “as is” and “as available” basis to the
+            maximum extent permitted by applicable law. Kasperia does not
+            guarantee that the app or any related service will be uninterrupted,
+            error-free, secure, accurate, current, or free from harmful
+            components.
         </p>
 
-        <h2>11. Disclaimer of Warranties</h2>
+        <h2>13. Limitation of Liability</h2>
+
         <p>
-            Kasperia is provided on an “as is” and “as available” basis. We do not guarantee that the App will be
-            uninterrupted,
-            error-free, secure, or free from defects.
-        </p>
-        <p>
-            To the maximum extent permitted by applicable law, Kasperia disclaims all warranties, whether express,
-            implied,
-            or statutory, including warranties of merchantability, fitness for a particular purpose, and
-            non-infringement.
+            To the maximum extent permitted by applicable law, Kasperia will not
+            be liable for losses arising from lost or disclosed wallet
+            credentials, incorrect transactions, unsupported assets, blockchain
+            network conditions, smart contracts, third-party services, bridge
+            operations, phishing, malware, device loss, or any other event
+            outside Kasperia’s reasonable control.
         </p>
 
-        <h2>12. Limitation of Liability</h2>
+        <h2>14. Intellectual Property</h2>
+
         <p>
-            To the maximum extent permitted by applicable law, Kasperia shall not be liable for any indirect,
-            incidental,
-            special, consequential, exemplary, or punitive damages, or for any loss of assets, profits, data, goodwill,
-            or business opportunities.
-        </p>
-        <p>
-            This includes losses arising from user error, lost recovery phrases, unauthorized access, blockchain network
-            issues,
-            third-party services, smart contract failures, or irreversible transactions.
+            Kasperia and its original software, interface, names, logos, and
+            materials are protected by applicable intellectual-property laws.
+            Except as permitted by law, you may not copy, modify, distribute,
+            reverse engineer, or misuse the app or its materials.
         </p>
 
-        <h2>13. Changes to this Agreement</h2>
-        <p>
-            We may update this Agreement from time to time. The latest version will be made available within the App or
-            on our
-            official website. Your continued use of Kasperia after updates means you accept the revised Agreement.
-        </p>
+        <h2>15. Changes to This Agreement</h2>
 
-        <h2>14. Contact Us</h2>
         <p>
-            If you have any questions about this Agreement, please contact us at:
-            <a href="mailto:support@kasperia.app">support@kasperia.app</a>
+            Kasperia may update this Agreement from time to time. The latest
+            version will be published at the agreement link provided in the app.
+            The date at the top of this page shows when the Agreement was last
+            updated. Your continued use of Kasperia after an update means that
+            you accept the revised Agreement.
         </p>
 
         <p class="footer">
-            Thank you for using Kasperia.
+            If any provision of this Agreement is found to be unenforceable,
+            the remaining provisions will continue to apply to the extent
+            permitted by applicable law.
         </p>
     </main>
 </body>
-
 </html>

@@ -54,7 +54,7 @@
 <a class="toc-sub" href="#qr-format">General Format</a>
 <a class="toc-sub" href="#qr-kaspa">KAS Transfer QR</a>
 <a class="toc-sub" href="#qr-app-pages">Kasperia App Pages</a>
-<a class="toc-sub" href="#qr-krc20">KRC20 Transfer / Mint</a>
+<a class="toc-sub" href="#qr-krc20">KRC20 Transfer</a>
 <a class="toc-sub" href="#qr-evm">EVM Transfer</a>
 <a class="toc-sub" href="#qr-dapp">Open dApp URL</a>
 <a class="toc-sub" href="#qr-builder">QR Builder Examples</a>
@@ -539,12 +539,12 @@ provider.on('disconnect', (error) =&gt; {
   console.log('Disconnected:', error);
 });</code></pre>
 <h2 id="qr-overview">QR Scan Link Overview</h2>
-<p>Kasperia scans the plain-text content inside a QR code, classifies it by protocol, and opens the matching app page with parsed parameters. Scanning only prepares the target page; it does not automatically submit a transfer, mint, bridge action, or transaction. The user must still review and confirm inside the app.</p>
-<div class="callout">The current Flutter scanner navigation supports these QR result types: Kasperia app pages, Kaspa transfer, KRC20 transfer / mint / token detail, EVM transfer, and normal web dApp URLs opened inside the app WebView.</div>
+<p>Kasperia scans the plain-text content inside a QR code, classifies it by protocol, and opens the matching app page with parsed parameters. Scanning only prepares the target page; it does not automatically submit a transfer, bridge action, or transaction. The user must still review and confirm inside the app.</p>
+<div class="callout">The current Flutter scanner navigation supports these QR result types: Kasperia app pages, Kaspa transfer, KRC20 transfer / token detail, EVM transfer, and normal web dApp URLs opened inside the app WebView.</div>
 <div class="protocol-grid">
 <div class="qr-protocol-card"><span class="qr-protocol-name">Kaspa address / kaspa://</span><p>Open the Send KAS page with recipient, amount, and optional payload.</p></div>
 <div class="qr-protocol-card"><span class="qr-protocol-name">kasperia://</span><p>Open an internal Kasperia app page, including Bridge, KRC20 token list, or Ecosystem Fund.</p></div>
-<div class="qr-protocol-card"><span class="qr-protocol-name">krc20://</span><p>Open KRC20 transfer, mint, or token detail flows.</p></div>
+<div class="qr-protocol-card"><span class="qr-protocol-name">krc20://</span><p>Open KRC20 transfer or token detail flows.</p></div>
 <div class="qr-protocol-card"><span class="qr-protocol-name">ethereum://</span><p>Open an EVM native-token or contract-token transfer page by chain id.</p></div>
 <div class="qr-protocol-card"><span class="qr-protocol-name">http:// / https://</span><p>Open a dApp URL inside the Kasperia in-app browser.</p></div>
 </div>
@@ -558,7 +558,7 @@ provider.on('disconnect', (error) =&gt; {
 <tr><td><code>address</code></td><td>Bridge, Ecosystem Fund</td><td>Alternative recipient field accepted by internal app pages.</td><td><code>address=kaspatest:...</code></td></tr>
 <tr><td><code>amount</code></td><td>KAS, KRC20, EVM, Bridge, Ecosystem Fund</td><td>Optional amount used to pre-fill the target page. Use a human-readable decimal value in QR links.</td><td><code>amount=5</code></td></tr>
 <tr><td><code>payload</code></td><td>KAS</td><td>Optional Kaspa transaction payload passed to the Send KAS page.</td><td><code>payload=hello</code></td></tr>
-<tr><td><code>tick</code></td><td>KRC20</td><td>KRC20 ticker symbol. Required for transfer, mint, and token detail routes.</td><td><code>tick=JEMES</code></td></tr>
+<tr><td><code>tick</code></td><td>KRC20</td><td>KRC20 ticker symbol. Required for transfer and token detail routes.</td><td><code>tick=JEMES</code></td></tr>
 <tr><td><code>chainId</code></td><td>EVM</td><td>Required EVM chain id. The app must already have a matching network config.</td><td><code>chainId=56</code></td></tr>
 <tr><td><code>token</code></td><td>EVM</td><td>Optional ERC20 contract address. If omitted, the app opens the native-token transfer flow.</td><td><code>token=0x1234567890abcdef1234567890abcdef12345678</code></td></tr>
 <tr><td><code>targetAmount</code></td><td>Ecosystem Fund</td><td>Optional target amount for the Ecosystem Fund page.</td><td><code>targetAmount=100</code></td></tr>
@@ -614,20 +614,18 @@ provider.on('disconnect', (error) =&gt; {
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">kasperia://bridge?to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
 kasperia://krc20_tokens
 kasperia://eco_system_fund?address=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5&amp;targetAmount=100</code></pre>
-<h2 id="qr-krc20">KRC20 Transfer / Mint QR</h2>
-<p>Use the <code>krc20://</code> scheme for KRC20 actions. The app reads <code>tick</code> as the token identifier, checks the current account token data when needed, and opens the matching KRC20 page. For transfer and mint, if a recipient is provided, the Kaspa address prefix must match the current Kaspa network.</p>
+<h2 id="qr-krc20">KRC20 Transfer QR</h2>
+<p>Use the <code>krc20://</code> scheme for KRC20 transfer and token detail actions. The app reads <code>tick</code> as the token identifier, checks the current account token data when needed, and opens the matching KRC20 page. If a recipient is provided for a transfer, the Kaspa address prefix must match the current Kaspa network.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Action</th><th>QR content</th><th>Required parameters</th><th>Result in app</th></tr></thead>
 <tbody>
 <tr><td>Transfer</td><td><code>krc20://transfer?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>; optional <code>to</code>, <code>amount</code></td><td>Open the KRC20 Send page for the ticker.</td></tr>
-<tr><td>Mint</td><td><code>krc20://mint?tick=JEMES&amp;to=kaspatest:...&amp;amount=5</code></td><td><code>tick</code>; optional <code>to</code>, <code>amount</code></td><td>Open the KRC20 Mint page. If <code>to</code> is missing, the current account Kaspa address is used.</td></tr>
 <tr><td>Token detail</td><td><code>krc20://token?tick=JEMES</code></td><td><code>tick</code></td><td>Open the KRC20 token detail page if the token exists for the current account.</td></tr>
 </tbody>
 </table>
 </div>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-text">krc20://transfer?tick=JEMES&amp;to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
-krc20://mint?tick=JEMES&amp;to=kaspatest:qp48ut63r78w5umx6tpk4vu6s4ftv79x2uf56arar3acqs368mxd65sfdeqjl&amp;amount=5
 krc20://token?tick=JEMES</code></pre>
 <pre><button class="copy-btn" type="button">Copy</button><code class="language-js">function buildKrc20TransferQr({ tick, to, amount }) {
   const params = new URLSearchParams();
@@ -694,7 +692,6 @@ const examples = {
   krc20TokenList: 'kasperia://krc20_tokens',
   ecosystemFund: `kasperia://eco_system_fund?address=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5&amp;targetAmount=100`,
   krc20Transfer: `krc20://transfer?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
-  krc20Mint: `krc20://mint?tick=JEMES&amp;to=${encodeURIComponent(KAS_TEST_ADDRESS)}&amp;amount=5`,
   krc20Token: 'krc20://token?tick=JEMES',
   evmNativeTransfer: 'ethereum://transfer?chainId=56&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=1.5',
   evmTokenTransfer: 'ethereum://transfer?chainId=56&amp;token=0x1234567890abcdef1234567890abcdef12345678&amp;to=0x46C7956fDbC3c81b5D5aca9E20d9ACcFF59037BF&amp;amount=100',
@@ -703,7 +700,7 @@ const examples = {
 };</code></pre>
 <h2 id="qr-notes">Validation Notes</h2>
 <ol>
-<li>Scanning a payment, mint, bridge, or EVM QR opens a pre-filled app page; the user must still confirm the action.</li>
+<li>Scanning a payment, bridge, or EVM QR opens a pre-filled app page; the user must still confirm the action.</li>
 <li>For Kaspa and KRC20 links, the recipient address prefix must match the current Kaspa network. Use <code>kaspa:</code> on mainnet and <code>kaspatest:</code> on testnet.</li>
 <li>For KRC20 actions, <code>tick</code> is required. If the token cannot be found for the current account, the app shows an error.</li>
 <li>For EVM transfer links, <code>chainId</code> is required, must be greater than zero, and must exist in the app EVM network config.</li>
